@@ -27,7 +27,10 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
   const [expanded, setExpanded] = useState(false);
 
   const selected = listings.find((listing) => listing.id === selectedId) ?? null;
-  const amounts = useMemo(() => (selected ? calculateOrderAmounts(selected.unitPrice, quantity) : null), [selected, quantity]);
+  const amounts = useMemo(
+    () => (selected ? calculateOrderAmounts(selected.unitPrice, quantity) : null),
+    [selected, quantity],
+  );
 
   function select(listing: ListingDto) {
     setSelectedId(listing.id);
@@ -58,7 +61,9 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
       <section>
         <h2 className="mb-3 flex items-baseline justify-between text-lg font-bold">
           {t('event.listings')}
-          <span className="text-sm font-normal text-slate-500">{t('event.listingsCount', { count: listings.length })}</span>
+          <span className="text-sm font-normal text-slate-500">
+            {t('event.listingsCount', { count: listings.length })}
+          </span>
         </h2>
         <div role="radiogroup" aria-label={t('event.listings')} className="space-y-2.5">
           {listings.map((listing) => (
@@ -72,8 +77,7 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
           ))}
         </div>
         <InfoHint icon={ShieldCheck} iconClassName="text-emerald-600" className="mt-4">
-          <span className="font-semibold text-slate-700">{t('checkout.escrowTitle')}</span>{' '}
-          {t('checkout.escrowNote')}
+          <span className="font-semibold text-slate-700">{t('checkout.escrowTitle')}</span> {t('checkout.escrowNote')}
         </InfoHint>
       </section>
 

@@ -31,12 +31,15 @@ export async function EventCard({ event, locale }: { event: EventSummaryDto; loc
         <div className="flex items-end justify-between pt-1">
           {event.minPrice !== null ? (
             <p className="text-sm text-slate-500">
-              {t('from')} <span className="text-base font-bold text-slate-900">{formatVnd(event.minPrice, locale)}</span>
+              {t('from')}{' '}
+              <span className="text-base font-bold text-slate-900">{formatVnd(event.minPrice, locale)}</span>
             </p>
           ) : (
             <span />
           )}
-          <span className="text-xs font-medium text-emerald-700">{t('ticketsLeft', { count: event.ticketsAvailable })}</span>
+          <span className="text-xs font-medium text-emerald-700">
+            {t('ticketsLeft', { count: event.ticketsAvailable })}
+          </span>
         </div>
       </div>
     </Link>

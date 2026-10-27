@@ -17,7 +17,10 @@ export async function EventHero({ event, locale }: { event: EventDetailDto; loca
     <section className={cn('bg-gradient-to-br text-white', eventCover(event.id))}>
       <div className="bg-black/25">
         <Container className="py-5 sm:py-10">
-          <Link href={ROUTES.home} className="inline-flex items-center gap-1 text-sm font-medium text-white/85 hover:text-white">
+          <Link
+            href={ROUTES.home}
+            className="inline-flex items-center gap-1 text-sm font-medium text-white/85 hover:text-white"
+          >
             <ChevronLeft className="size-4" />
             {t('event.back')}
           </Link>

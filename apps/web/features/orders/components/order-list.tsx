@@ -15,11 +15,15 @@ export async function OrderList({ orders, locale }: { orders: OrderDto[]; locale
     <ul className="divide-y divide-slate-100">
       {orders.map((order) => (
         <li key={order.id}>
-          <Link href={ROUTES.order(order.id)} className="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-50 sm:px-5">
+          <Link
+            href={ROUTES.order(order.id)}
+            className="flex items-center gap-3 px-4 py-3 transition hover:bg-slate-50 sm:px-5"
+          >
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-slate-900">{order.event.name}</p>
               <p className="truncate text-xs text-slate-500">
-                #{order.id} · {order.quantity} × {formatVnd(order.unitPrice, locale)} · {formatDateTime(order.createdAt, locale)}
+                #{order.id} · {order.quantity} × {formatVnd(order.unitPrice, locale)} ·{' '}
+                {formatDateTime(order.createdAt, locale)}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">

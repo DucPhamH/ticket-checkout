@@ -37,7 +37,11 @@ export function ListingOption({ listing, selected, isOwn, onSelect }: ListingOpt
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-slate-900">{listing.seller.name}</p>
         <p className="text-xs text-slate-500">
-          {isOwn ? <Badge variant="brand">{t('yourListing')}</Badge> : t('available', { count: listing.quantityAvailable })}
+          {isOwn ? (
+            <Badge variant="brand">{t('yourListing')}</Badge>
+          ) : (
+            t('available', { count: listing.quantityAvailable })
+          )}
         </p>
       </div>
       <div className="text-right">

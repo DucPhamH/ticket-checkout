@@ -18,14 +18,14 @@ bug in application code cannot write an unbalanced transaction. Lines are insert
 
 ## Accounts
 
-| Code | Type | Meaning |
-|---|---|---|
-| `platform:gateway_clearing` | asset | money VNPay collected for us |
-| `seller:{id}:pending` | liability | seller money held in escrow |
-| `seller:{id}:available` | liability | released to the seller |
-| `buyer:{id}:refund_payable` | liability | owed back to a buyer |
-| `platform:fee_pending` | liability | our fee, not yet earned (event may be cancelled) |
-| `platform:fee_revenue` | revenue | our fee, earned |
+| Code                        | Type      | Meaning                                          |
+| --------------------------- | --------- | ------------------------------------------------ |
+| `platform:gateway_clearing` | asset     | money VNPay collected for us                     |
+| `seller:{id}:pending`       | liability | seller money held in escrow                      |
+| `seller:{id}:available`     | liability | released to the seller                           |
+| `buyer:{id}:refund_payable` | liability | owed back to a buyer                             |
+| `platform:fee_pending`      | liability | our fee, not yet earned (event may be cancelled) |
+| `platform:fee_revenue`      | revenue   | our fee, earned                                  |
 
 Balance of an asset = sum of amounts; of a liability or revenue account = minus the sum.
 
@@ -34,13 +34,13 @@ Balance of an asset = sum of amounts; of a liability or revenue account = minus 
 Example order: 2 tickets × 500,000 = subtotal 1,000,000; buyer pays 1,100,000; seller gets
 950,000; we keep 150,000.
 
-| Event | Debit | Credit |
-|---|---|---|
-| `PAYMENT_CAPTURED` (IPN success) | gateway_clearing 1,100,000 | seller pending 950,000; fee_pending 150,000 |
-| `EVENT_SETTLED` (event completed) | seller pending 950,000; fee_pending 150,000 | seller available 950,000; fee_revenue 150,000 |
-| `ORDER_CANCELLED` (event cancelled) | seller pending 950,000; fee_pending 150,000 | buyer refund_payable 1,100,000 |
-| `LATE_PAYMENT` (paid after the order expired) | gateway_clearing 1,100,000 | buyer refund_payable 1,100,000 |
-| `REFUND_COMPLETED` (VNPay refund OK) | buyer refund_payable 1,100,000 | gateway_clearing 1,100,000 |
+| Event                                         | Debit                                       | Credit                                        |
+| --------------------------------------------- | ------------------------------------------- | --------------------------------------------- |
+| `PAYMENT_CAPTURED` (IPN success)              | gateway_clearing 1,100,000                  | seller pending 950,000; fee_pending 150,000   |
+| `EVENT_SETTLED` (event completed)             | seller pending 950,000; fee_pending 150,000 | seller available 950,000; fee_revenue 150,000 |
+| `ORDER_CANCELLED` (event cancelled)           | seller pending 950,000; fee_pending 150,000 | buyer refund_payable 1,100,000                |
+| `LATE_PAYMENT` (paid after the order expired) | gateway_clearing 1,100,000                  | buyer refund_payable 1,100,000                |
+| `REFUND_COMPLETED` (VNPay refund OK)          | buyer refund_payable 1,100,000              | gateway_clearing 1,100,000                    |
 
 Why the fee sits in `fee_pending` first: until the event happens the sale can still be
 reversed, so it is not revenue yet.

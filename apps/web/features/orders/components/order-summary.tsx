@@ -31,7 +31,12 @@ export async function OrderSummary({ order, locale }: { order: OrderDto; locale:
             </div>
           ))}
         </dl>
-        <PriceBreakdown unitPrice={order.unitPrice} quantity={order.quantity} amounts={order} className="rounded-xl bg-slate-50 p-3" />
+        <PriceBreakdown
+          unitPrice={order.unitPrice}
+          quantity={order.quantity}
+          amounts={order}
+          className="rounded-xl bg-slate-50 p-3"
+        />
       </CardContent>
     </Card>
   );

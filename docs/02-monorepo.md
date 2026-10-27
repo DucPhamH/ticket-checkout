@@ -2,11 +2,11 @@
 
 npm workspaces, three packages:
 
-| Package | Path | Depends on |
-|---|---|---|
+| Package      | Path              | Depends on         |
+| ------------ | ----------------- | ------------------ |
 | `@tc/shared` | `packages/shared` | nothing at runtime |
-| `@tc/api` | `apps/api` | `@tc/shared` |
-| `@tc/web` | `apps/web` | `@tc/shared` |
+| `@tc/api`    | `apps/api`        | `@tc/shared`       |
+| `@tc/web`    | `apps/web`        | `@tc/shared`       |
 
 ## The shared package
 
@@ -55,4 +55,10 @@ npm run build      shared -> api -> web
 npm run test       api tests (includes shared fee math)
 npm run lint       all workspaces
 npm run typecheck  all workspaces
+npm run format     Prettier (with Tailwind class sorting)
 ```
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push: format check, lint, typecheck, tests (against a
+Postgres service container), production build, and `docker compose build`.

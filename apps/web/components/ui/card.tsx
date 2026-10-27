@@ -5,7 +5,9 @@ export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
 }
 
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5', className)} {...props} />;
+  return (
+    <div className={cn('flex items-center justify-between gap-3 px-4 pt-4 sm:px-5 sm:pt-5', className)} {...props} />
+  );
 }
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {

@@ -23,7 +23,8 @@ export default defineConfig([
             ...SHARED.map((target) => ({
               target,
               from: ['./features', './app'],
-              message: 'Shared code must not import from features/ or app/. Move the code to shared or compose it in app/.',
+              message:
+                'Shared code must not import from features/ or app/. Move the code to shared or compose it in app/.',
             })),
             // Features never import pages.
             { target: './features', from: './app', message: 'Features must not import from app/.' },

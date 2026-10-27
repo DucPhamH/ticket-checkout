@@ -21,15 +21,15 @@ reconciliation, and a refund API.
 
 Every call is stored in `payment_notifications` before anything else, then:
 
-| Check | Response |
-|---|---|
-| Signature invalid | `97` |
-| Order not found | `01` |
-| Amount differs from the order | `04` |
-| Order already processed | `02` (idempotent: no second ledger posting) |
-| Success code: mark `PAID`, post ledger, in one DB transaction | `00` |
-| Failure code: mark `FAILED`, release tickets | `00` |
-| Anything unexpected | `99` |
+| Check                                                         | Response                                    |
+| ------------------------------------------------------------- | ------------------------------------------- |
+| Signature invalid                                             | `97`                                        |
+| Order not found                                               | `01`                                        |
+| Amount differs from the order                                 | `04`                                        |
+| Order already processed                                       | `02` (idempotent: no second ledger posting) |
+| Success code: mark `PAID`, post ledger, in one DB transaction | `00`                                        |
+| Failure code: mark `FAILED`, release tickets                  | `00`                                        |
+| Anything unexpected                                           | `99`                                        |
 
 VNPay stops retrying after `00` or `02`; otherwise it retries up to 10 times, 5 minutes apart.
 

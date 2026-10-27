@@ -26,7 +26,9 @@ export async function LedgerList({ lines, locale }: { lines: LedgerLineDto[]; lo
                 {line.account} · {formatDateTime(line.createdAt, locale)}
               </p>
             </div>
-            <span className={cn('text-sm font-semibold tabular-nums', delta >= 0 ? 'text-emerald-600' : 'text-slate-500')}>
+            <span
+              className={cn('text-sm font-semibold tabular-nums', delta >= 0 ? 'text-emerald-600' : 'text-slate-500')}
+            >
               {delta >= 0 ? '+' : '−'}
               {formatVnd(Math.abs(delta), locale)}
             </span>

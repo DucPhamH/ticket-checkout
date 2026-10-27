@@ -22,9 +22,33 @@ export const MOCK_EVENTS: EventDetailDto[] = [
     description:
       'Một đêm nhạc indie ngoài trời với các nghệ sĩ hàng đầu. Vé được bán lại bởi người dùng; tiền được giữ an toàn cho đến khi sự kiện diễn ra.',
     listings: [
-      { id: 1, eventId: 1, seller: { id: 1, name: 'Alice Nguyen' }, unitPrice: 450_000, quantityAvailable: 4, quantityTotal: 4, status: 'ACTIVE' },
-      { id: 2, eventId: 1, seller: { id: 2, name: 'Bob Tran' }, unitPrice: 520_000, quantityAvailable: 2, quantityTotal: 3, status: 'ACTIVE' },
-      { id: 3, eventId: 1, seller: { id: 1, name: 'Alice Nguyen' }, unitPrice: 1_200_000, quantityAvailable: 3, quantityTotal: 3, status: 'ACTIVE' },
+      {
+        id: 1,
+        eventId: 1,
+        seller: { id: 1, name: 'Alice Nguyen' },
+        unitPrice: 450_000,
+        quantityAvailable: 4,
+        quantityTotal: 4,
+        status: 'ACTIVE',
+      },
+      {
+        id: 2,
+        eventId: 1,
+        seller: { id: 2, name: 'Bob Tran' },
+        unitPrice: 520_000,
+        quantityAvailable: 2,
+        quantityTotal: 3,
+        status: 'ACTIVE',
+      },
+      {
+        id: 3,
+        eventId: 1,
+        seller: { id: 1, name: 'Alice Nguyen' },
+        unitPrice: 1_200_000,
+        quantityAvailable: 3,
+        quantityTotal: 3,
+        status: 'ACTIVE',
+      },
     ],
   },
   {
@@ -39,13 +63,26 @@ export const MOCK_EVENTS: EventDetailDto[] = [
     ticketsAvailable: 5,
     description: 'Ba giờ jazz đỉnh cao tại Nhà hát Thành phố.',
     listings: [
-      { id: 4, eventId: 2, seller: { id: 2, name: 'Bob Tran' }, unitPrice: 800_000, quantityAvailable: 5, quantityTotal: 6, status: 'ACTIVE' },
+      {
+        id: 4,
+        eventId: 2,
+        seller: { id: 2, name: 'Bob Tran' },
+        unitPrice: 800_000,
+        quantityAvailable: 5,
+        quantityTotal: 6,
+        status: 'ACTIVE',
+      },
     ],
   },
 ];
 
 const ORDER_BASE = {
-  event: { id: 1, name: 'Hà Nội Indie Night 2026', venue: 'Cung Điền kinh Mỹ Đình', startsAt: '2026-12-12T12:30:00.000Z' },
+  event: {
+    id: 1,
+    name: 'Hà Nội Indie Night 2026',
+    venue: 'Cung Điền kinh Mỹ Đình',
+    startsAt: '2026-12-12T12:30:00.000Z',
+  },
   seller: { id: 1, name: 'Alice Nguyen' },
   quantity: 2,
   unitPrice: 450_000,
@@ -73,9 +110,33 @@ export const MOCK_BALANCES: Record<number, BalancesDto> = {
 };
 
 export const MOCK_LEDGER: LedgerLineDto[] = [
-  { id: 3, createdAt: '2026-10-27T03:02:00.000Z', kind: 'PAYMENT_CAPTURED', account: 'seller:1:pending', amount: -855_000, orderId: 101, eventId: 1 },
-  { id: 7, createdAt: '2026-10-20T09:00:00.000Z', kind: 'EVENT_SETTLED', account: 'seller:1:available', amount: -1_140_000, orderId: null, eventId: 3 },
-  { id: 6, createdAt: '2026-10-20T09:00:00.000Z', kind: 'EVENT_SETTLED', account: 'seller:1:pending', amount: 1_140_000, orderId: null, eventId: 3 },
+  {
+    id: 3,
+    createdAt: '2026-10-27T03:02:00.000Z',
+    kind: 'PAYMENT_CAPTURED',
+    account: 'seller:1:pending',
+    amount: -855_000,
+    orderId: 101,
+    eventId: 1,
+  },
+  {
+    id: 7,
+    createdAt: '2026-10-20T09:00:00.000Z',
+    kind: 'EVENT_SETTLED',
+    account: 'seller:1:available',
+    amount: -1_140_000,
+    orderId: null,
+    eventId: 3,
+  },
+  {
+    id: 6,
+    createdAt: '2026-10-20T09:00:00.000Z',
+    kind: 'EVENT_SETTLED',
+    account: 'seller:1:pending',
+    amount: 1_140_000,
+    orderId: null,
+    eventId: 3,
+  },
 ];
 
 export const MOCK_TRIAL_BALANCE = [
