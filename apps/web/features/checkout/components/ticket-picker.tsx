@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { ChevronUp, ShieldCheck } from 'lucide-react';
+import { useActionState, useMemo, useState } from 'react';
+import { AlertCircle, ChevronUp, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { calculateOrderAmounts, type ListingDto } from '@tc/shared';
+import { calculateOrderAmounts, MAX_TICKETS_PER_ORDER, type ListingDto } from '@tc/shared';
 import { createOrder } from '../actions';
 import { ListingOption } from './listing-option';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +25,7 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [expanded, setExpanded] = useState(false);
+  const [state, formAction] = useActionState(createOrder, null);
 
   const selected = listings.find((listing) => listing.id === selectedId) ?? null;
   const amounts = useMemo(
@@ -38,20 +39,28 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
   }
 
   const checkoutForm = selected && amounts && (
-    <form action={createOrder} className="space-y-4">
+    <form action={formAction} className="space-y-4">
       <input type="hidden" name="listingId" value={selected.id} />
       <input type="hidden" name="quantity" value={quantity} />
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-slate-700">{t('checkout.quantity')}</span>
         <QuantityStepper
           value={quantity}
-          max={selected.quantityAvailable}
+          max={Math.min(selected.quantityAvailable, MAX_TICKETS_PER_ORDER)}
           onChange={setQuantity}
           decreaseLabel={t('checkout.decrease')}
           increaseLabel={t('checkout.increase')}
         />
       </div>
       <PriceBreakdown unitPrice={selected.unitPrice} quantity={quantity} amounts={amounts} />
+      {state?.errorCode && (
+        <p role="alert" className="flex gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" />
+          {t.has(`checkout.errors.${state.errorCode}`)
+            ? t(`checkout.errors.${state.errorCode}`)
+            : t('checkout.errors.UNKNOWN')}
+        </p>
+      )}
       <PayButton />
     </form>
   );

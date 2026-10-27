@@ -12,7 +12,7 @@ import { getOrder } from '@/features/orders/api';
 // Shows the order's real status from the database, never the gateway's redirect parameters.
 export default async function OrderPage({ params }: PageProps<'/[locale]/orders/[id]'>) {
   const { locale, id } = await params;
-  const [t, order] = await Promise.all([getTranslations('order'), getOrder(Number(id))]);
+  const [t, order] = await Promise.all([getTranslations('order'), getOrder(id)]);
   if (!order) notFound();
 
   return (

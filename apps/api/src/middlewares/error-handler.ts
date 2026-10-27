@@ -13,6 +13,9 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   if (err instanceof HttpError) {
     status = err.status;
     body = { error: { code: err.code, message: err.message } };
+  } else if (isJsonParseError(err)) {
+    status = 400;
+    body = { error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } };
   } else if (err instanceof ZodError) {
     status = 400;
     body = {
@@ -28,3 +31,8 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
 
   res.status(status).json(body);
 };
+
+// express.json() raises this when the body cannot be parsed.
+function isJsonParseError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && (err as { type?: string }).type === 'entity.parse.failed';
+}

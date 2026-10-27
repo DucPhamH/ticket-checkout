@@ -12,8 +12,10 @@ describe('GET /users', () => {
   it('lists the seeded users ordered by id', async () => {
     const res = await request(app).get('/users');
     expect(res.status).toBe(200);
-    expect(res.body.map((u: { name: string }) => u.name)).toEqual(['Alice Nguyen', 'Bob Tran', 'Chi Le', 'Admin']);
-    expect(res.body[3]).toEqual({ id: 4, name: 'Admin', role: 'ADMIN' });
+    // Other test files tag their fixtures with a leading "["; only the seed matters here.
+    const seeded = res.body.filter((u: { name: string }) => !u.name.startsWith('['));
+    expect(seeded.map((u: { name: string }) => u.name)).toEqual(['Alice Nguyen', 'Bob Tran', 'Chi Le', 'Admin']);
+    expect(seeded[3]).toEqual({ id: 4, name: 'Admin', role: 'ADMIN' });
   });
 });
 

@@ -1,6 +1,14 @@
-**Input validated in controllers with zod.** `Schema.parse(req.params)` returns typed values and
-reuses the schema in the OpenAPI doc; the error handler turns `ZodError` into
-`400 VALIDATION_ERROR` with the failing field (`id: ...`).
+**Overselling is prevented by one conditional UPDATE**
+(`quantity_available = quantity_available - n WHERE quantity_available >= n`) inside the order
+transaction; Postgres locks the row, so concurrent buyers are serialised. Tests fire 2 and 10
+simultaneous requests at the last tickets, and fail if the reservation is rewritten as
+read-then-write.
 
-**An inactive event returns no listings.** Its page still loads (by id), but a completed or
-cancelled event cannot be bought, so listing its tickets would mislead.
+**Admins cannot buy** (403 `ADMIN_CANNOT_BUY`): the admin is an operator account. **Sellers cannot
+buy their own listing** (409 `OWN_LISTING`). **At most 10 tickets per order**, shared by the UI
+stepper and the api.
+
+**Someone else's order is a 404, not a 403**, so order ids cannot be probed.
+
+**API test files run one at a time** against the shared dev database, each creating and removing
+its own tagged fixtures.

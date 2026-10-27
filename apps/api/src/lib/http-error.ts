@@ -13,6 +13,10 @@ export class HttpError extends Error {
     return new HttpError(401, code, message);
   }
 
+  static forbidden(code: string, message: string) {
+    return new HttpError(403, code, message);
+  }
+
   static notFound(code: string, message: string) {
     return new HttpError(404, code, message);
   }

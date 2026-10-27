@@ -2,6 +2,7 @@ import { createDocument } from 'zod-openapi';
 import { env } from '../config/env';
 import { eventsPaths } from '../modules/events/events.openapi';
 import { healthPaths } from '../modules/health/health.openapi';
+import { ordersPaths } from '../modules/orders/orders.openapi';
 import { usersPaths } from '../modules/users/users.openapi';
 import { USER_ID_HEADER } from '../constants/http';
 import { ErrorResponseSchema } from './common';
@@ -23,11 +24,13 @@ export const openApiDocument = createDocument(
       { name: 'System', description: 'Operational endpoints' },
       { name: 'Users', description: 'Demo users and the current user' },
       { name: 'Events', description: 'Events and the tickets listed for them' },
+      { name: 'Orders', description: 'Buying tickets' },
     ],
     paths: {
       ...healthPaths,
       ...usersPaths,
       ...eventsPaths,
+      ...ordersPaths,
     },
     components: {
       schemas: { ErrorResponse: ErrorResponseSchema },

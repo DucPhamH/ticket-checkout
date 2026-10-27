@@ -64,3 +64,8 @@ export type LedgerLineDto = {
   orderId: number | null;
   eventId: number | null;
 };
+
+export type CreateOrderInput = {
+  listingId: number;
+  quantity: number;
+};

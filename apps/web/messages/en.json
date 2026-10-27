@@ -45,7 +45,15 @@
     "viewDetails": "View details",
     "hideDetails": "Hide",
     "escrowTitle": "Protected payment.",
-    "escrowNote": "ReTix holds your payment and only releases it to the seller after the event. Tickets are reserved for you for 15 minutes."
+    "escrowNote": "ReTix holds your payment and only releases it to the seller after the event. Tickets are reserved for you for 15 minutes.",
+    "errors": {
+      "ADMIN_CANNOT_BUY": "Admin accounts cannot buy tickets. Switch to another user.",
+      "OWN_LISTING": "You cannot buy your own listing.",
+      "LISTING_NOT_ON_SALE": "This listing is no longer on sale. Reload to see what is left.",
+      "NOT_ENOUGH_TICKETS": "Not enough tickets left. Someone bought before you; lower the quantity or pick another listing.",
+      "LISTING_NOT_FOUND": "This listing no longer exists. Reload to see what is left.",
+      "UNKNOWN": "Could not create the order. Please try again."
+    }
   },
   "order": {
     "title": "Order #{id}",

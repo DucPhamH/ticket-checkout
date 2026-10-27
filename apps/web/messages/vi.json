@@ -45,7 +45,15 @@
     "viewDetails": "Xem chi tiết",
     "hideDetails": "Thu gọn",
     "escrowTitle": "Thanh toán được bảo vệ.",
-    "escrowNote": "Tiền được ReTix giữ hộ và chỉ chuyển cho người bán sau khi sự kiện diễn ra. Vé được giữ cho bạn trong 15 phút."
+    "escrowNote": "Tiền được ReTix giữ hộ và chỉ chuyển cho người bán sau khi sự kiện diễn ra. Vé được giữ cho bạn trong 15 phút.",
+    "errors": {
+      "ADMIN_CANNOT_BUY": "Tài khoản quản trị không mua vé được. Hãy đổi sang người dùng khác.",
+      "OWN_LISTING": "Bạn không thể mua vé của chính mình.",
+      "LISTING_NOT_ON_SALE": "Tin đăng này không còn bán nữa. Tải lại trang để xem vé còn lại.",
+      "NOT_ENOUGH_TICKETS": "Không còn đủ vé. Có người vừa mua trước bạn, hãy giảm số lượng hoặc chọn tin khác.",
+      "LISTING_NOT_FOUND": "Không tìm thấy tin đăng này. Tải lại trang để xem vé còn lại.",
+      "UNKNOWN": "Không tạo được đơn. Vui lòng thử lại."
+    }
   },
   "order": {
     "title": "Đơn hàng #{id}",

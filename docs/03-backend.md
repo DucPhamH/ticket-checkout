@@ -23,8 +23,8 @@ src/
 test/                 mirrors src/
 ```
 
-Modules built so far: `health`, `users`, `events`. Next: `orders`, `payments`, `ledger`, `listings`,
-`admin`, each added when the feature that needs it is built.
+Modules built so far: `health`, `users`, `events`, `orders` (create, read). Next: order expiry,
+`payments`, `ledger`, `listings`, `admin`, each added when the feature that needs it is built.
 
 ## Request lifecycle
 

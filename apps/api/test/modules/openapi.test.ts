@@ -8,7 +8,7 @@ describe('OpenAPI', () => {
     expect(res.status).toBe(200);
     expect(res.body.openapi).toBe('3.1.0');
     expect(Object.keys(res.body.paths)).toEqual(
-      expect.arrayContaining(['/health', '/users', '/me', '/events', '/events/{id}']),
+      expect.arrayContaining(['/health', '/users', '/me', '/events', '/events/{id}', '/orders', '/orders/{id}']),
     );
     expect(res.body.components.schemas).toHaveProperty('ErrorResponse');
     expect(res.body.components.schemas).toHaveProperty('HealthResponse');
