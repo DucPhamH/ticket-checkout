@@ -4,12 +4,12 @@
 
 ## Hai cách chạy
 
-|              | Toàn bộ trong Docker                          | Chế độ dev (tự tải lại)                                                                        |
-| ------------ | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Bật          | `docker compose up -d --build`                | `npm run dev:db`, rồi `npm run dev` (api + web trong một terminal, gắn nhãn `[api]` / `[web]`) |
-| Khi sửa code | build lại: `docker compose up -d --build api` | tự nhận thay đổi                                                                               |
-| Xem log      | `docker compose logs -f api`                  | in ngay trong từng terminal                                                                    |
-| Dùng khi     | chạy giống reviewer; kiểm tra bản build thật  | phát triển hằng ngày                                                                           |
+|              | Toàn bộ trong Docker                          | Chế độ dev (tự tải lại)                                                                                              |
+| ------------ | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Bật          | `docker compose up -d --build`                | `npm run dev:db`, rồi `npm run dev` (shared + api + web trong một terminal, gắn nhãn `[shared]` / `[api]` / `[web]`) |
+| Khi sửa code | build lại: `docker compose up -d --build api` | tự nhận thay đổi                                                                                                     |
+| Xem log      | `docker compose logs -f api`                  | in ngay trong từng terminal                                                                                          |
+| Dùng khi     | chạy giống reviewer; kiểm tra bản build thật  | phát triển hằng ngày                                                                                                 |
 
 Cả hai cách đều dùng cổng 4000 cho api và 3000 cho web, nên phải dừng service trong Docker trước
 khi chạy chính nó ở chế độ dev: `docker compose stop api`.
@@ -19,14 +19,19 @@ khi chạy chính nó ở chế độ dev: `docker compose stop api`.
 ```bash
 docker compose stop api web   # nhường cổng 4000 và 3000 nếu bản Docker đang chạy
 npm run dev:db                # Postgres trong Docker (thứ duy nhất chế độ dev cần từ Docker)
-npm run dev                   # api ở :4000 và web ở :3000, lưu file là tự tải lại
+npm run dev                   # shared (tự build lại khi lưu), api ở :4000, web ở :3000; lưu file là tự tải lại
 # Ctrl+C để dừng cả hai
 ```
 
 Muốn mỗi service một terminal riêng thì chạy `npm run dev:api` và `npm run dev:web`.
 
-Sửa `packages/shared` thì build lại nó (`npm run build -w @tc/shared`); sửa `schema.prisma` thì chạy
+`npm run dev` cũng tự biên dịch lại `packages/shared` khi lưu file. Các app import bản đã biên dịch
+(`dist/`), không phải `src/`, nên nếu chỉ chạy `dev:api` / `dev:web` thì sửa shared sẽ không có tác
+dụng cho tới khi chạy `npm run build -w @tc/shared`. Sửa `schema.prisma` thì chạy
 `npm run db:migrate -w @tc/api`.
+
+`console.log` hiện ở đâu: code chạy ở server (api, Server Component) in ra terminal; code trong
+component có `'use client'` in ra **Console của DevTools trên trình duyệt**.
 
 ## Lệnh Docker
 
