@@ -34,6 +34,8 @@ npm run build -w @tc/shared
 npm run dev:api        # http://localhost:4000
 npm run dev:web        # http://localhost:3000
 
+docker compose logs -f api   # api request logs (see docs/running.md)
+
 npm run lint && npm run typecheck && npm test
 npm run format
 ```

@@ -78,3 +78,9 @@ and the schema does not, the build fails.
 Adding an endpoint means: write the zod schemas in `<feature>.schema.ts`, describe the route in
 `<feature>.openapi.ts`, and spread its paths into `src/openapi/document.ts`.
 `test/modules/openapi.test.ts` checks the spec is served and contains every module's paths.
+
+## Logging
+
+`pino` with `pino-http`: one line per request (method, path, status, duration, user id, request
+id), level by status. Unexpected errors are logged with their stack by the error handler.
+`LOG_SQL=true` prints every SQL statement. See [Running and logs](running.md).

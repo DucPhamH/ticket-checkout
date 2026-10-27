@@ -15,4 +15,6 @@ Nếu mới làm quen với codebase, nên đọc theo thứ tự:
 9. [Hướng dẫn đọc database](08-database-guide.md) – sơ đồ, giải thích từng bảng, một lần mua vé đi qua các bảng, câu hỏi tự kiểm tra
 10. [Khái niệm database](09-database-concepts.md) – ràng buộc, index, transaction, khoá dòng, trigger, PL/pgSQL, view, migration; giải thích từng dòng SQL viết tay
 
+Vận hành: [Chạy app và xem log](running.md).
+
 Tài liệu mô tả thiết kế. Phần nào đã thiết kế nhưng chưa làm sẽ được ghi rõ.

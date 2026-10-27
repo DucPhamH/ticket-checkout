@@ -1,5 +1,6 @@
 import express from 'express';
 import { errorHandler } from './middlewares/error-handler';
+import { requestLogger } from './middlewares/request-logger';
 import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
 import { eventsRouter } from './modules/events/events.router';
@@ -10,6 +11,7 @@ import { openApiRouter } from './openapi/openapi.router';
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
+  app.use(requestLogger);
   app.use(express.json());
 
   app.use('/health', healthRouter);

@@ -79,3 +79,9 @@ thì build lỗi.
 Thêm một endpoint gồm: viết schema zod trong `<x>.schema.ts`, mô tả route trong
 `<x>.openapi.ts`, rồi thêm các path đó vào `src/openapi/document.ts`.
 `test/modules/openapi.test.ts` kiểm tra spec được phục vụ và có đủ path của mọi module.
+
+## Ghi log
+
+`pino` cùng `pino-http`: mỗi request một dòng (phương thức, đường dẫn, mã trạng thái, thời gian,
+người gọi, mã request), mức log theo mã trạng thái. Lỗi bất ngờ được bộ xử lý lỗi ghi kèm stack.
+`LOG_SQL=true` in ra mọi câu SQL. Xem [Chạy app và xem log](running.md).

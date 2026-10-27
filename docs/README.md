@@ -13,4 +13,6 @@ Read in order if you are new to the codebase.
 7. [Database](07-database.md) – tables, constraints, indexes, seed
 8. [Decisions](decisions.md) – choices the brief left open, and why
 
+Operations: [Running and logs](running.md).
+
 Docs describe the design. Where something is designed but not built yet, the doc says so.
