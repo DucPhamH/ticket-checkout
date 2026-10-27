@@ -35,3 +35,22 @@ export async function listActiveEvents() {
     stats: statsByEvent.get(event.id) ?? { minPrice: null, ticketsAvailable: 0 },
   }));
 }
+
+// One event with the listings a buyer can choose from, cheapest first.
+// Listings are only returned while the event is on sale.
+export async function findEventWithListings(id: number) {
+  const event = await prisma.event.findUnique({
+    where: { id },
+    include: {
+      listings: {
+        where: onSaleListingWhere,
+        orderBy: [{ unitPrice: 'asc' }, { id: 'asc' }],
+        include: { seller: { select: { id: true, name: true } } },
+      },
+    },
+  });
+  if (!event) return null;
+  return { ...event, listings: event.status === EventStatus.ACTIVE ? event.listings : [] };
+}
+
+export type EventWithListings = NonNullable<Awaited<ReturnType<typeof findEventWithListings>>>;

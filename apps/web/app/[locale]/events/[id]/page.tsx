@@ -9,10 +9,10 @@ import { getEvent } from '@/features/events/api';
 
 export default async function EventPage({ params }: PageProps<'/[locale]/events/[id]'>) {
   const { locale, id } = await params;
-  const [t, event, currentUser] = await Promise.all([getTranslations('event'), getEvent(Number(id)), getCurrentUser()]);
+  const [t, event, currentUser] = await Promise.all([getTranslations('event'), getEvent(id), getCurrentUser()]);
   if (!event) notFound();
 
-  const listings = event.listings.filter((listing) => listing.status === 'ACTIVE');
+  const { listings } = event; // the api only returns listings on sale
 
   return (
     <>

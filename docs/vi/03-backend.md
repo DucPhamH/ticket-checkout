@@ -12,7 +12,7 @@ src/
   constants/          hằng số nghiệp vụ (thời gian giữ vé, mã tài khoản sổ cái)
   db/                 Prisma client (sinh vào src/generated, không commit)
   lib/                tiện ích nhỏ, không phụ thuộc framework (HttpError, money)
-  middlewares/        người dùng hiện tại, validate, not-found, xử lý lỗi
+  middlewares/        người dùng hiện tại, not-found, xử lý lỗi
   openapi/            ghép tài liệu OpenAPI và hai route /docs, /openapi.json
   modules/<tính năng>/
     <x>.router.ts      khai báo route -> controller
@@ -23,16 +23,26 @@ src/
 test/                 cấu trúc giống src/
 ```
 
-Module đã làm: `health`, `users`, `events` (danh sách). Tiếp theo: chi tiết sự kiện, `orders`,
-`payments`, `ledger`, `listings`, `admin`, mỗi module được thêm khi làm tới tính năng cần nó.
+Module đã làm: `health`, `users`, `events`. Tiếp theo: `orders`, `payments`, `ledger`, `listings`,
+`admin`, mỗi module được thêm khi làm tới tính năng cần nó.
 
 ## Vòng đời một request
 
 ```
-router -> validate (zod) -> controller -> service -> db
-                                   \-> ném HttpError
-                                         -> errorHandler -> { error: { code, message } }
+router -> [currentUser] -> controller -> service -> db
+                              │  kiểm tra input bằng zod (ZodError -> 400 VALIDATION_ERROR)
+                              └─ service/controller ném HttpError (404, 409, ...)
+                                   -> errorHandler -> { error: { code, message } }
 ```
+
+Input được kiểm tra ngay trong controller bằng chính schema zod mà tài liệu OpenAPI dùng:
+
+```ts
+const { id } = EventIdParamsSchema.parse(req.params); // id: number, số nguyên dương
+```
+
+Kiểm tra trong controller (thay vì một middleware chung) giữ được kiểu dữ liệu TypeScript của giá
+trị đã kiểm tra, và Express 5 không cho ghi đè `req.query`.
 
 Mọi lỗi trả ra từ api đều cùng một dạng:
 

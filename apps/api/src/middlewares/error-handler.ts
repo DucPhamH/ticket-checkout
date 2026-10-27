@@ -13,7 +13,12 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     body = { error: { code: err.code, message: err.message } };
   } else if (err instanceof ZodError) {
     status = 400;
-    body = { error: { code: 'VALIDATION_ERROR', message: err.issues.map((i) => i.message).join('; ') } };
+    body = {
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: err.issues.map((issue) => [issue.path.join('.'), issue.message].filter(Boolean).join(': ')).join('; '),
+      },
+    };
   } else {
     console.error(err);
   }

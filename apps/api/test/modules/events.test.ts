@@ -93,3 +93,38 @@ describe('GET /events', () => {
     expect(new Date(event.startsAt).toISOString()).toBe(event.startsAt);
   });
 });
+
+describe('GET /events/:id', () => {
+  it('returns the event with its listings cheapest first, including the seller', async () => {
+    const res = await request(app).get('/events/1');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: 1, name: 'Hà Nội Indie Night 2026', minPrice: 450_000, ticketsAvailable: 9 });
+    expect(res.body.listings.map((l: { unitPrice: number }) => l.unitPrice)).toEqual([450_000, 520_000, 1_200_000]);
+    expect(res.body.listings[0].seller).toEqual({ id: 1, name: 'Alice Nguyen' });
+  });
+
+  it('only lists listings that are active and not sold out', async () => {
+    const res = await request(app).get(`/events/${mixedId}`);
+    expect(res.body.listings).toHaveLength(1);
+    expect(res.body).toMatchObject({ minPrice: 300_000, ticketsAvailable: 2 });
+  });
+
+  it('returns an inactive event without listings', async () => {
+    const res = await request(app).get(`/events/${completedId}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ status: 'COMPLETED', listings: [], minPrice: null, ticketsAvailable: 0 });
+  });
+
+  it('answers 404 for an unknown event', async () => {
+    const res = await request(app).get('/events/999999');
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe('EVENT_NOT_FOUND');
+  });
+
+  it.each(['abc', '0', '-1', '1.5'])('answers 400 for id %s', async (id) => {
+    const res = await request(app).get(`/events/${id}`);
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    expect(res.body.error.message).toMatch(/^id: /);
+  });
+});

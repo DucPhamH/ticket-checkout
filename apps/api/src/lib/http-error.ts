@@ -9,10 +9,6 @@ export class HttpError extends Error {
     this.name = 'HttpError';
   }
 
-  static badRequest(code: string, message: string) {
-    return new HttpError(400, code, message);
-  }
-
   static unauthorized(code: string, message: string) {
     return new HttpError(401, code, message);
   }

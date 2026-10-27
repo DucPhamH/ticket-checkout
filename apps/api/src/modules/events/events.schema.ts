@@ -1,5 +1,15 @@
 import { z } from 'zod';
-import { EVENT_STATUSES, type EventSummaryDto } from '@tc/shared';
+import {
+  EVENT_STATUSES,
+  LISTING_STATUSES,
+  type EventDetailDto,
+  type EventSummaryDto,
+  type ListingDto,
+} from '@tc/shared';
+
+export const EventIdParamsSchema = z.object({
+  id: z.coerce.number().int().positive().meta({ description: 'Event id', example: 1 }),
+});
 
 export const EventSummarySchema = z
   .object({
@@ -17,3 +27,22 @@ export const EventSummarySchema = z
     ticketsAvailable: z.number().int().meta({ description: 'Tickets on sale across all listings', example: 9 }),
   })
   .meta({ id: 'EventSummary' }) satisfies z.ZodType<EventSummaryDto>;
+
+export const ListingSchema = z
+  .object({
+    id: z.number().int().meta({ example: 1 }),
+    eventId: z.number().int().meta({ example: 1 }),
+    seller: z.object({ id: z.number().int(), name: z.string() }).meta({ example: { id: 1, name: 'Alice Nguyen' } }),
+    unitPrice: z.number().int().meta({ description: 'Price per ticket, VND', example: 450000 }),
+    quantityAvailable: z.number().int().meta({ example: 4 }),
+    quantityTotal: z.number().int().meta({ example: 4 }),
+    status: z.enum(LISTING_STATUSES),
+  })
+  .meta({ id: 'Listing' }) satisfies z.ZodType<ListingDto>;
+
+export const EventDetailSchema = EventSummarySchema.extend({
+  description: z.string(),
+  listings: z.array(ListingSchema).meta({
+    description: 'Listings on sale, cheapest first. Empty when the event is no longer active.',
+  }),
+}).meta({ id: 'EventDetail' }) satisfies z.ZodType<EventDetailDto>;

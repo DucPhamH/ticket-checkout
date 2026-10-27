@@ -12,7 +12,7 @@ src/
   constants/          business constants (reservation window, ledger account codes)
   db/                 Prisma client (generated into src/generated, not committed)
   lib/                small framework-free helpers (HttpError, money)
-  middlewares/        current user, validation, not-found, error handler
+  middlewares/        current user, not-found, error handler
   openapi/            OpenAPI document assembly and the /docs, /openapi.json routes
   modules/<feature>/
     <feature>.router.ts      routes -> controller
@@ -23,16 +23,26 @@ src/
 test/                 mirrors src/
 ```
 
-Modules built so far: `health`, `users`, `events` (list). Next: event detail, `orders`, `payments`,
-`ledger`, `listings`, `admin`, each added when the feature that needs it is built.
+Modules built so far: `health`, `users`, `events`. Next: `orders`, `payments`, `ledger`, `listings`,
+`admin`, each added when the feature that needs it is built.
 
 ## Request lifecycle
 
 ```
-router -> validate (zod) -> controller -> service -> db
-                                   \-> throws HttpError
-                                         -> errorHandler -> { error: { code, message } }
+router -> [currentUser] -> controller -> service -> db
+                              │  parses input with zod (ZodError -> 400 VALIDATION_ERROR)
+                              └─ service/controller throw HttpError (404, 409, ...)
+                                   -> errorHandler -> { error: { code, message } }
 ```
+
+Input is validated in the controller with the same zod schema the OpenAPI doc uses:
+
+```ts
+const { id } = EventIdParamsSchema.parse(req.params); // id: number, positive integer
+```
+
+Parsing in the controller (rather than a generic middleware) keeps the parsed value typed, and
+Express 5 does not allow replacing `req.query`.
 
 Every error leaves the api in the same shape:
 
