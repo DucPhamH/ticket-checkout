@@ -1,5 +1,7 @@
 # Ledger
 
+[Tiếng Việt](vi/06-ledger.md)
+
 > Status: tables, constraints and triggers are built and tested (see [Database](07-database.md)).
 > The posting service and balance queries come next.
 

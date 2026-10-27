@@ -1,5 +1,7 @@
 # Monorepo
 
+[Tiếng Việt](vi/02-monorepo.md)
+
 npm workspaces, three packages:
 
 | Package      | Path              | Depends on         |

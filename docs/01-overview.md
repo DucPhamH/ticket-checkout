@@ -1,16 +1,18 @@
 # Overview
 
+[Tiếng Việt](vi/01-overview.md)
+
 A resale marketplace slice: a buyer picks a listing, pays through VNPay, and the money is
 held in escrow until the event is marked completed.
 
 ## Services
 
-| Service | Port             | Role                                                                                     |
-| ------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| `web`   | 3000             | Next.js. Renders pages on the server, owns no business logic and no DB access.           |
-| `api`   | 4000             | Express. Orders, payments, ledger, admin actions. The only thing that talks to Postgres. |
-| `db`    | 5432             | PostgreSQL 16.                                                                           |
-| `ngrok` | 4040 (inspector) | Optional (`--profile tunnel`). Gives the api a public URL so VNPay can deliver IPN.      |
+| Service | Port             | Role                                                                                                          |
+| ------- | ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `web`   | 3000             | Next.js. Renders pages on the server, owns no business logic and no DB access.                                |
+| `api`   | 4000             | Express. Orders, payments, ledger, admin actions. The only thing that talks to Postgres. API docs at `/docs`. |
+| `db`    | 5432             | PostgreSQL 16.                                                                                                |
+| `ngrok` | 4040 (inspector) | Optional (`--profile tunnel`). Gives the api a public URL so VNPay can deliver IPN.                           |
 
 ```
 browser ──> web ──(server-side fetch)──> api ──> db

@@ -1,5 +1,7 @@
 # Frontend (apps/web)
 
+[Tiếng Việt](vi/04-frontend.md)
+
 Next.js 16 App Router, Tailwind v4, next-intl. Structure follows
 [bulletproof-react](https://github.com/alan2207/bulletproof-react/blob/master/docs/project-structure.md)
 and the "split by feature" option in the

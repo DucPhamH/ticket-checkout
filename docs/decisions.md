@@ -1,5 +1,7 @@
 # Decisions
 
+[Tiếng Việt](vi/decisions.md)
+
 Choices the brief left open. Newest at the bottom.
 
 **VNPay as the gateway.** See [Payments](05-payments.md#why-vnpay).
@@ -53,3 +55,6 @@ application logic, so a bug cannot write an inconsistent order or an unbalanced 
 **Integer ids.** Simple and readable in a demo. Sequential order ids in URLs would be a problem
 with real users (enumeration); with authentication and ownership checks it matters less, and
 a public random reference could be added.
+
+**OpenAPI generated from zod schemas.** One source of truth for validation and documentation,
+instead of hand-written YAML or JSDoc comments that drift.

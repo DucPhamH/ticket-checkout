@@ -1,5 +1,7 @@
 # Payments (VNPay)
 
+[Tiếng Việt](vi/05-payments.md)
+
 > Status: designed, not yet implemented (plan step 6).
 
 ## Why VNPay

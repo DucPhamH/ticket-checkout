@@ -23,6 +23,7 @@ docker compose up --build
 
 - Web: http://localhost:3000
 - Api: http://localhost:4000/health
+- API docs (Swagger): http://localhost:4000/docs
 
 ## Development
 

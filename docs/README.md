@@ -1,5 +1,7 @@
 # Architecture docs
 
+[Tiếng Việt](vi/README.md)
+
 Read in order if you are new to the codebase.
 
 1. [Overview](01-overview.md) – what runs where and how a request flows

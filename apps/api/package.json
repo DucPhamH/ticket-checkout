@@ -25,7 +25,9 @@
     "pg": "^8.23.1",
     "zod": "^4.6.7",
     "@prisma/client": "7.10.1",
-    "@prisma/adapter-pg": "7.10.1"
+    "@prisma/adapter-pg": "7.10.1",
+    "zod-openapi": "^6.0.2",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
@@ -42,6 +44,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-import-resolver-typescript": "^4.4.5",
     "globals": "^17.13.0",
-    "prisma": "7.10.1"
+    "prisma": "7.10.1",
+    "@types/swagger-ui-express": "^4.1.8"
   }
 }
