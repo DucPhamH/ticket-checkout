@@ -2,6 +2,7 @@ import express from 'express';
 import { errorHandler } from './middlewares/error-handler';
 import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
+import { eventsRouter } from './modules/events/events.router';
 import { usersRouter } from './modules/users/users.router';
 import { openApiRouter } from './openapi/openapi.router';
 
@@ -13,6 +14,7 @@ export function createApp() {
 
   app.use('/health', healthRouter);
   app.use(usersRouter);
+  app.use(eventsRouter);
   app.use(openApiRouter);
 
   app.use(notFound);

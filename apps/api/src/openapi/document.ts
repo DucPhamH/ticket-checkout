@@ -1,5 +1,6 @@
 import { createDocument } from 'zod-openapi';
 import { env } from '../config/env';
+import { eventsPaths } from '../modules/events/events.openapi';
 import { healthPaths } from '../modules/health/health.openapi';
 import { usersPaths } from '../modules/users/users.openapi';
 import { USER_ID_HEADER } from '../constants/http';
@@ -21,10 +22,12 @@ export const openApiDocument = createDocument(
     tags: [
       { name: 'System', description: 'Operational endpoints' },
       { name: 'Users', description: 'Demo users and the current user' },
+      { name: 'Events', description: 'Events and the tickets listed for them' },
     ],
     paths: {
       ...healthPaths,
       ...usersPaths,
+      ...eventsPaths,
     },
     components: {
       schemas: { ErrorResponse: ErrorResponseSchema },

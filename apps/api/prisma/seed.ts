@@ -5,7 +5,13 @@ import { AccountType, UserRole } from '../src/generated/prisma/enums';
 import { PLATFORM_ACCOUNTS } from '../src/constants/ledger';
 import { prisma } from '../src/db/prisma';
 
-const days = (n: number) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
+// N days from today at a given Vietnam local time (UTC+7), e.g. 19:30 for an evening show.
+function daysFromNowAt(days: number, hour: number, minute: number): Date {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() + days);
+  date.setUTCHours(hour - 7, minute, 0, 0);
+  return date;
+}
 
 async function main() {
   if ((await prisma.user.count()) > 0) {
@@ -28,7 +34,7 @@ async function main() {
           'An open-air night of indie music with leading artists. Tickets are resold by fans; your payment is held until the event takes place.',
         venue: 'Cung Điền kinh Mỹ Đình',
         city: 'Hà Nội',
-        startsAt: days(45),
+        startsAt: daysFromNowAt(45, 19, 30),
       },
     });
     const jazzFestival = await tx.event.create({
@@ -37,7 +43,7 @@ async function main() {
         description: 'Three hours of jazz at the Saigon Opera House.',
         venue: 'Nhà hát Thành phố',
         city: 'TP. Hồ Chí Minh',
-        startsAt: days(25),
+        startsAt: daysFromNowAt(25, 20, 0),
       },
     });
 

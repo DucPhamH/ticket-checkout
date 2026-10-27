@@ -23,8 +23,8 @@ src/
 test/                 cấu trúc giống src/
 ```
 
-Module đã làm: `health`, `users`. Tiếp theo: `events`, `orders`, `payments`, `ledger`, `listings`,
-`admin`, mỗi module được thêm khi làm tới tính năng cần nó.
+Module đã làm: `health`, `users`, `events` (danh sách). Tiếp theo: chi tiết sự kiện, `orders`,
+`payments`, `ledger`, `listings`, `admin`, mỗi module được thêm khi làm tới tính năng cần nó.
 
 ## Vòng đời một request
 

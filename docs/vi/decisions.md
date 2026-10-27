@@ -58,3 +58,8 @@ bớt nghiêm trọng, và có thể thêm một mã công khai ngẫu nhiên.
 
 **Tài liệu OpenAPI sinh từ schema zod.** Một nguồn sự thật cho cả validate lẫn tài liệu, thay vì
 YAML viết tay hay comment JSDoc dễ bị lệch.
+
+**Danh sách sự kiện công khai chỉ hiện sự kiện đang mở bán**, gần nhất trước. Sự kiện đã diễn ra
+hoặc đã huỷ không mua được nữa; trang của chúng vẫn mở được bằng id, và admin có danh sách riêng.
+`minPrice` và `ticketsAvailable` chỉ tính các tin đăng đang bán và còn vé, bằng một câu truy vấn
+`GROUP BY` thay vì tải mọi tin đăng.

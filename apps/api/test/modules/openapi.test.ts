@@ -7,7 +7,7 @@ describe('OpenAPI', () => {
     const res = await request(createApp()).get('/openapi.json');
     expect(res.status).toBe(200);
     expect(res.body.openapi).toBe('3.1.0');
-    expect(Object.keys(res.body.paths)).toEqual(expect.arrayContaining(['/health', '/users', '/me']));
+    expect(Object.keys(res.body.paths)).toEqual(expect.arrayContaining(['/health', '/users', '/me', '/events']));
     expect(res.body.components.schemas).toHaveProperty('ErrorResponse');
     expect(res.body.components.schemas).toHaveProperty('HealthResponse');
   });

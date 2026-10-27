@@ -9,7 +9,6 @@ export const MOCK_EVENTS: EventDetailDto[] = [
     city: 'Hà Nội',
     startsAt: '2026-12-12T12:30:00.000Z',
     status: 'ACTIVE',
-    imageUrl: null,
     minPrice: 450_000,
     ticketsAvailable: 9,
     description:
@@ -51,7 +50,6 @@ export const MOCK_EVENTS: EventDetailDto[] = [
     city: 'TP. Hồ Chí Minh',
     startsAt: '2026-11-21T13:00:00.000Z',
     status: 'ACTIVE',
-    imageUrl: null,
     minPrice: 800_000,
     ticketsAvailable: 5,
     description: 'Ba giờ jazz đỉnh cao tại Nhà hát Thành phố.',

@@ -58,3 +58,8 @@ a public random reference could be added.
 
 **OpenAPI generated from zod schemas.** One source of truth for validation and documentation,
 instead of hand-written YAML or JSDoc comments that drift.
+
+**The public event list shows active events only**, soonest first. Completed or cancelled events
+can no longer be bought; their pages stay reachable by id, and admin gets its own list.
+`minPrice` and `ticketsAvailable` count only listings that are active and not sold out, computed
+with one `GROUP BY` query rather than loading every listing.

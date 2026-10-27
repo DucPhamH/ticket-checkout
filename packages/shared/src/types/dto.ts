@@ -15,7 +15,6 @@ export type EventSummaryDto = {
   city: string;
   startsAt: string;
   status: EventStatus;
-  imageUrl: string | null;
   minPrice: number | null;
   ticketsAvailable: number;
 };
