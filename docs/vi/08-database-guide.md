@@ -1,6 +1,6 @@
 # Hướng dẫn đọc database (từng bảng)
 
-[Tóm tắt kỹ thuật: Cơ sở dữ liệu](07-database.md)
+[Tóm tắt kỹ thuật: Cơ sở dữ liệu](07-database.md) · [Khái niệm: index, trigger, khoá dòng, PL/pgSQL…](09-database-concepts.md)
 
 Tài liệu này đi qua từng bảng: bảng dùng để làm gì, từng cột nghĩa là gì, ràng buộc nào bảo vệ
 nó, và dữ liệu thật trông ra sao. Cuối tài liệu là một lần mua vé đi qua các bảng theo từng bước,
