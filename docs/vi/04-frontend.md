@@ -13,8 +13,8 @@ app/[locale]/_components/  phần cấp app, ghép nhiều tính năng (SiteHead
 components/ui/             khối nền: Button, Card, Badge, Money, QuantityStepper...
 components/layout/         Container, thanh điều hướng, nút đổi ngôn ngữ
 components/pricing/        PriceBreakdown (checkout và orders cùng dùng)
-constants/                 hằng số toàn app (route, màu trạng thái sự kiện)
-lib/                       cn(), định dạng
+constants/                 hằng số toàn app (route, URL api, cookie phiên, màu trạng thái sự kiện)
+lib/                       cn(), định dạng, api-client, session
 features/<tính năng>/
   components/              giao diện riêng của tính năng
   api.ts                   lấy dữ liệu, chỉ chạy ở server
@@ -42,7 +42,12 @@ Luật `import/no-restricted-paths` trong `eslint.config.mjs` kiểm tra điều
 ## Lấy dữ liệu
 
 Trang là Server Component. Trang gọi `features/*/api.ts` (đánh dấu `server-only`), file này gọi
-api qua mạng nội bộ của Docker. Trình duyệt không bao giờ thấy URL của api. Trang được render
+api qua mạng nội bộ của Docker thông qua `lib/api-client.ts`. Trình duyệt không bao giờ thấy URL
+của api.
+
+`apiRequest()` gửi `X-User-Id` lấy từ cookie phiên (`lib/session.ts`) ở mọi lần gọi, và biến
+response lỗi thành `ApiError` mang `code` của api. Phiên nằm ở phần dùng chung chứ không nằm trong
+tính năng `users`, vì tính năng nào gọi api cũng cần nó. Trang được render
 theo từng request (ký hiệu `ƒ` khi build), nên tin đăng và trạng thái đơn luôn mới.
 
 Thay đổi dữ liệu (tạo đơn, đổi người dùng, thao tác quản trị) là Server Action trong

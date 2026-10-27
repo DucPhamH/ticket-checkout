@@ -1,12 +1,5 @@
 // Design-phase fixtures. Deleted once services call the real api (step 4).
-import type { BalancesDto, EventDetailDto, LedgerLineDto, OrderDto, UserDto } from '@tc/shared';
-
-export const MOCK_USERS: UserDto[] = [
-  { id: 1, name: 'Alice Nguyen', role: 'USER' },
-  { id: 2, name: 'Bob Tran', role: 'USER' },
-  { id: 3, name: 'Chi Le', role: 'USER' },
-  { id: 4, name: 'Admin', role: 'ADMIN' },
-];
+import type { BalancesDto, EventDetailDto, LedgerLineDto, OrderDto } from '@tc/shared';
 
 export const MOCK_EVENTS: EventDetailDto[] = [
   {

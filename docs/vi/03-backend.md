@@ -23,8 +23,8 @@ src/
 test/                 cấu trúc giống src/
 ```
 
-Module: `health` (đã làm), `users`, `events`, `listings`, `orders`, `payments`, `ledger`,
-`admin` (sẽ làm).
+Module đã làm: `health`, `users`. Tiếp theo: `events`, `orders`, `payments`, `ledger`, `listings`,
+`admin`, mỗi module được thêm khi làm tới tính năng cần nó.
 
 ## Vòng đời một request
 
@@ -47,10 +47,14 @@ và lập trình viên. Lỗi không lường trước trở thành `500 INTERNA
 Express 5 tự chuyển promise bị reject trong handler async sang bộ xử lý lỗi, nên handler không
 cần try/catch.
 
-## Người dùng hiện tại (sẽ làm)
+## Người dùng hiện tại
 
-Không có đăng nhập, đề bài cho phép. Web gửi header `X-User-Id`; một middleware nạp người dùng và
-từ chối id không tồn tại. Route quản trị kiểm tra thêm vai trò.
+Không có đăng nhập, đề bài cho phép. Web gửi header `X-User-Id`; middleware `currentUser`
+(`middlewares/current-user.ts`) nạp người dùng và gán vào `req.currentUser`, hoặc trả 401 với
+`MISSING_USER_ID`, `INVALID_USER_ID` hay `UNKNOWN_USER`. Chỉ route nào cần người dùng mới dùng
+middleware này (hiện là `GET /me`). Route quản trị sẽ kiểm tra thêm vai trò.
+
+Trong Swagger UI, bấm **Authorize** và nhập id người dùng (1–4) để mọi lần gọi đều gửi header.
 
 ## Tài liệu API (OpenAPI / Swagger)
 

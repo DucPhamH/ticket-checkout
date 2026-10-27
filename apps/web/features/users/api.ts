@@ -1,16 +1,20 @@
 import 'server-only';
-import { cookies } from 'next/headers';
 import type { UserDto } from '@tc/shared';
-import { MOCK_USERS } from '@/mocks/data';
-import { CURRENT_USER_COOKIE, DEFAULT_USER_ID } from './constants';
+import { DEFAULT_USER_ID } from '@/constants/session';
+import { ApiError, apiRequest } from '@/lib/api-client';
 
-export async function listUsers(): Promise<UserDto[]> {
-  return MOCK_USERS;
+export function listUsers(): Promise<UserDto[]> {
+  return apiRequest<UserDto[]>('/users');
 }
 
-// No real auth (allowed by the brief): the selected user id lives in a cookie.
 export async function getCurrentUser(): Promise<UserDto> {
-  const users = await listUsers();
-  const id = Number((await cookies()).get(CURRENT_USER_COOKIE)?.value ?? DEFAULT_USER_ID);
-  return users.find((user) => user.id === id) ?? users.find((user) => user.id === DEFAULT_USER_ID) ?? users[0];
+  try {
+    return await apiRequest<UserDto>('/me');
+  } catch (error) {
+    // A stale cookie (e.g. after the database was reset) falls back to the default user.
+    if (error instanceof ApiError && error.status === 401) {
+      return apiRequest<UserDto>('/me', { userId: DEFAULT_USER_ID });
+    }
+    throw error;
+  }
 }

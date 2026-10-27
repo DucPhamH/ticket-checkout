@@ -2,6 +2,7 @@ import express from 'express';
 import { errorHandler } from './middlewares/error-handler';
 import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
+import { usersRouter } from './modules/users/users.router';
 import { openApiRouter } from './openapi/openapi.router';
 
 // Builds the Express app without listening, so tests can call it directly.
@@ -11,6 +12,7 @@ export function createApp() {
   app.use(express.json());
 
   app.use('/health', healthRouter);
+  app.use(usersRouter);
   app.use(openApiRouter);
 
   app.use(notFound);

@@ -13,8 +13,8 @@ app/[locale]/_components/  app-level pieces that combine several features (SiteH
 components/ui/          primitives: Button, Card, Badge, Money, QuantityStepper...
 components/layout/      Container, nav, locale switcher
 components/pricing/     PriceBreakdown (used by checkout and orders)
-constants/              app-wide constants (routes, event status colours)
-lib/                    cn(), formatting
+constants/              app-wide constants (routes, api URL, session cookie, event status colours)
+lib/                    cn(), formatting, api-client, session
 features/<feature>/
   components/           UI owned by this feature
   api.ts                server-only data access
@@ -42,7 +42,12 @@ This is enforced by `import/no-restricted-paths` in `eslint.config.mjs`, so a vi
 ## Data fetching
 
 Pages are Server Components. They call `features/*/api.ts`, which is marked `server-only` and
-calls the api over the internal Docker network. The browser never sees the api URL. Pages are
+calls the api over the internal Docker network through `lib/api-client.ts`. The browser never
+sees the api URL.
+
+`apiRequest()` sends `X-User-Id` from the session cookie (`lib/session.ts`) on every call and
+turns error responses into an `ApiError` carrying the api's `code`. The session lives in shared
+code, not in the `users` feature, because every feature that calls the api needs it. Pages are
 rendered per request (`ƒ` in the build output), so listings and order status are always fresh.
 
 Mutations (create order, switch user, admin actions) are Server Actions in

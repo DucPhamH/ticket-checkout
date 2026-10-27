@@ -23,8 +23,8 @@ src/
 test/                 mirrors src/
 ```
 
-Modules: `health` (built), `users`, `events`, `listings`, `orders`, `payments`, `ledger`,
-`admin` (to be built).
+Modules built so far: `health`, `users`. Next: `events`, `orders`, `payments`, `ledger`, `listings`,
+`admin`, each added when the feature that needs it is built.
 
 ## Request lifecycle
 
@@ -46,10 +46,14 @@ logs and developers. Unknown errors become `500 INTERNAL_ERROR` and are logged, 
 Express 5 forwards rejected promises from async handlers to the error handler, so handlers
 don't need try/catch.
 
-## Current user (to be built)
+## Current user
 
-No authentication, as allowed by the brief. Web sends `X-User-Id`; a middleware loads the user
-and rejects unknown ids. Admin routes additionally check the role.
+No authentication, as allowed by the brief. Web sends `X-User-Id`; the `currentUser` middleware
+(`middlewares/current-user.ts`) loads the user and sets `req.currentUser`, or answers 401 with
+`MISSING_USER_ID`, `INVALID_USER_ID` or `UNKNOWN_USER`. Only routes that need a user use it
+(`GET /me` today). Admin routes will additionally check the role.
+
+In Swagger UI, click **Authorize** and enter a user id (1–4) to send the header on every call.
 
 ## API documentation (OpenAPI / Swagger)
 
