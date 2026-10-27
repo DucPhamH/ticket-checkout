@@ -4,15 +4,29 @@
 
 ## Two ways to run
 
-|              | Everything in Docker                        | Dev mode (hot reload)                                                                    |
-| ------------ | ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Start        | `docker compose up -d --build`              | `docker compose up -d db`, then `npm run dev:api` and `npm run dev:web` in two terminals |
-| Code changes | rebuild: `docker compose up -d --build api` | picked up automatically                                                                  |
-| Logs         | `docker compose logs -f api`                | printed in each terminal                                                                 |
-| Use for      | what reviewers run; checking the real build | day-to-day development                                                                   |
+|              | Everything in Docker                        | Dev mode (hot reload)                                                                        |
+| ------------ | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Start        | `docker compose up -d --build`              | `npm run dev:db`, then `npm run dev` (api + web in one terminal, prefixed `[api]` / `[web]`) |
+| Code changes | rebuild: `docker compose up -d --build api` | picked up automatically                                                                      |
+| Logs         | `docker compose logs -f api`                | printed in each terminal                                                                     |
+| Use for      | what reviewers run; checking the real build | day-to-day development                                                                       |
 
 Both use port 4000 for the api and 3000 for web, so stop the Docker service before running the
 same one in dev mode: `docker compose stop api`.
+
+## Dev mode step by step
+
+```bash
+docker compose stop api web   # free ports 4000 and 3000 if the Docker versions are running
+npm run dev:db                # Postgres in Docker (the only thing dev mode needs from Docker)
+npm run dev                   # api on :4000 and web on :3000, both reload on save
+# Ctrl+C stops both
+```
+
+Run `npm run dev:api` or `npm run dev:web` instead to get each in its own terminal.
+
+After changing `packages/shared`, rebuild it (`npm run build -w @tc/shared`); after changing
+`schema.prisma`, run `npm run db:migrate -w @tc/api`.
 
 ## Docker commands
 

@@ -29,10 +29,9 @@ docker compose up --build
 
 ```bash
 npm install
-docker compose up -d db
+npm run dev:db         # Postgres in Docker
 npm run build -w @tc/shared
-npm run dev:api        # http://localhost:4000
-npm run dev:web        # http://localhost:3000
+npm run dev            # api :4000 + web :3000, reload on save
 
 docker compose logs -f api   # api request logs (see docs/running.md)
 
