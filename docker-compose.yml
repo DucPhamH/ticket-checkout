@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tc
+      POSTGRES_PASSWORD: tc
+      POSTGRES_DB: tc
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tc -d tc']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgresql://tc:tc@db:5432/tc
+      WEB_PUBLIC_URL: ${WEB_PUBLIC_URL:-http://localhost:3000}
+      API_PUBLIC_URL: ${API_PUBLIC_URL:-http://localhost:4000}
+      VNP_TMN_CODE: ${VNP_TMN_CODE:-}
+      VNP_HASH_SECRET: ${VNP_HASH_SECRET:-}
+      VNP_PAY_URL: ${VNP_PAY_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+      VNP_API_URL: ${VNP_API_URL:-https://sandbox.vnpayment.vn/merchant_webapi/api/transaction}
+    ports:
+      - '4000:4000'
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:4000/health || exit 1']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # Optional: exposes the api publicly so VNPay can deliver IPN.
+  # Run with: docker compose --profile tunnel up
+  ngrok:
+    image: ngrok/ngrok:latest
+    profiles: ['tunnel']
+    command: ['http', '--url=${NGROK_DOMAIN:-}', 'api:4000']
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    ports:
+      - '4040:4040'
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  db-data:

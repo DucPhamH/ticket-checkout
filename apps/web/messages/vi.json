@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "title": "ReTix – Mua bán lại vé sự kiện",
+    "description": "Mua vé sự kiện từ người bán lại, tiền được giữ an toàn đến khi sự kiện diễn ra."
+  },
+  "nav": {
+    "events": "Sự kiện",
+    "wallet": "Ví của tôi",
+    "admin": "Quản trị",
+    "actingAs": "Đang dùng với tư cách",
+    "switchUser": "Đổi người dùng",
+    "language": "Ngôn ngữ"
+  },
+  "home": {
+    "title": "Sự kiện sắp diễn ra",
+    "subtitle": "Vé bán lại từ người dùng. Tiền của bạn được giữ an toàn cho đến khi sự kiện diễn ra.",
+    "from": "Từ",
+    "ticketsLeft": "{count, plural, =0 {Hết vé} other {Còn # vé}}",
+    "empty": "Chưa có sự kiện nào"
+  },
+  "event": {
+    "back": "Tất cả sự kiện",
+    "about": "Giới thiệu",
+    "listings": "Vé đang bán",
+    "listingsCount": "{count} tin đăng",
+    "soldBy": "Người bán",
+    "perTicket": "/ vé",
+    "available": "{count, plural, =0 {Hết vé} other {Còn # vé}}",
+    "select": "Chọn",
+    "selected": "Đã chọn",
+    "yourListing": "Tin của bạn",
+    "noListings": "Chưa có ai bán vé cho sự kiện này",
+    "notActive": "Sự kiện này không còn nhận mua vé"
+  },
+  "checkout": {
+    "title": "Thanh toán",
+    "pickListing": "Chọn một tin đăng để tiếp tục",
+    "quantity": "Số lượng",
+    "decrease": "Giảm số lượng",
+    "increase": "Tăng số lượng",
+    "subtotal": "Tạm tính ({quantity} × {price})",
+    "serviceFee": "Phí dịch vụ (10%)",
+    "total": "Tổng thanh toán",
+    "pay": "Thanh toán với VNPay",
+    "viewDetails": "Xem chi tiết",
+    "hideDetails": "Thu gọn",
+    "escrowTitle": "Thanh toán được bảo vệ.",
+    "escrowNote": "Tiền được ReTix giữ hộ và chỉ chuyển cho người bán sau khi sự kiện diễn ra. Vé được giữ cho bạn trong 15 phút."
+  },
+  "order": {
+    "title": "Đơn hàng #{id}",
+    "summary": "Chi tiết đơn",
+    "event": "Sự kiện",
+    "seller": "Người bán",
+    "tickets": "Số vé",
+    "createdAt": "Thời gian đặt",
+    "paidAt": "Thời gian thanh toán",
+    "backToEvent": "Quay lại sự kiện",
+    "goToWallet": "Xem đơn của tôi",
+    "tryAgain": "Thử lại",
+    "result": {
+      "PENDING": {
+        "title": "Đang xác nhận thanh toán",
+        "body": "Chúng tôi đang chờ VNPay xác nhận. Trang sẽ tự cập nhật."
+      },
+      "PAID": {
+        "title": "Thanh toán thành công",
+        "body": "Vé của bạn đã được đặt. Tiền được giữ an toàn cho đến khi sự kiện diễn ra."
+      },
+      "FAILED": {
+        "title": "Thanh toán không thành công",
+        "body": "Giao dịch bị huỷ hoặc thất bại. Bạn chưa bị trừ tiền."
+      },
+      "EXPIRED": {
+        "title": "Đơn đã hết hạn",
+        "body": "Đã quá 15 phút giữ vé. Vé đã được trả lại cho người bán."
+      },
+      "REFUND_PENDING": {
+        "title": "Đang hoàn tiền",
+        "body": "Sự kiện đã bị huỷ. Chúng tôi đang hoàn tiền về tài khoản của bạn."
+      },
+      "REFUNDED": {
+        "title": "Đã hoàn tiền",
+        "body": "Tiền đã được hoàn về phương thức thanh toán của bạn."
+      }
+    }
+  },
+  "status": {
+    "order": {
+      "PENDING": "Đang xử lý",
+      "PAID": "Đã thanh toán",
+      "FAILED": "Thất bại",
+      "EXPIRED": "Hết hạn",
+      "REFUND_PENDING": "Đang hoàn tiền",
+      "REFUNDED": "Đã hoàn tiền"
+    },
+    "event": {
+      "ACTIVE": "Đang mở bán",
+      "COMPLETED": "Đã diễn ra",
+      "CANCELLED": "Đã huỷ"
+    }
+  },
+  "wallet": {
+    "title": "Ví của tôi",
+    "subtitle": "Mọi số dư được tính trực tiếp từ sổ cái.",
+    "pending": "Đang giữ (escrow)",
+    "pendingHint": "Tiền bán vé, sẽ được giải ngân khi sự kiện diễn ra.",
+    "available": "Khả dụng",
+    "availableHint": "Đã được giải ngân, có thể rút.",
+    "refundPending": "Đang hoàn cho bạn",
+    "refundPendingHint": "Tiền đang được hoàn từ các đơn bị huỷ.",
+    "myOrders": "Vé đã mua",
+    "noOrders": "Bạn chưa mua vé nào",
+    "ledger": "Lịch sử sổ cái",
+    "noLedger": "Chưa có giao dịch nào",
+    "ledgerKind": {
+      "PAYMENT_CAPTURED": "Thanh toán đơn hàng",
+      "EVENT_SETTLED": "Giải ngân sự kiện",
+      "ORDER_CANCELLED": "Huỷ đơn",
+      "LATE_PAYMENT": "Thanh toán trễ",
+      "REFUND_COMPLETED": "Hoàn tiền"
+    }
+  },
+  "admin": {
+    "title": "Quản trị",
+    "forbidden": "Chọn người dùng Admin để xem trang này.",
+    "events": "Sự kiện",
+    "complete": "Đánh dấu đã diễn ra",
+    "cancel": "Huỷ sự kiện",
+    "completeHint": "Giải ngân tiền escrow cho người bán.",
+    "trialBalance": "Bảng cân đối thử",
+    "trialBalanceHint": "Tổng tất cả tài khoản trong sổ cái luôn phải bằng 0.",
+    "account": "Tài khoản",
+    "balance": "Số dư",
+    "sum": "Tổng"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "back": "Về trang chủ"
+  }
+}

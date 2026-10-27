@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets – never commit
+.env
+.env.local
+
+# Internal working notes (Vietnamese), not part of the deliverable
+PLAN.md

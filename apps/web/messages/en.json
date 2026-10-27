@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "title": "ReTix – Event ticket resale",
+    "description": "Buy event tickets from resellers. Your money is held safely until the event takes place."
+  },
+  "nav": {
+    "events": "Events",
+    "wallet": "My wallet",
+    "admin": "Admin",
+    "actingAs": "Acting as",
+    "switchUser": "Switch user",
+    "language": "Language"
+  },
+  "home": {
+    "title": "Upcoming events",
+    "subtitle": "Tickets resold by real fans. Your money is held safely until the event takes place.",
+    "from": "From",
+    "ticketsLeft": "{count, plural, =0 {Sold out} one {# ticket left} other {# tickets left}}",
+    "empty": "No events yet"
+  },
+  "event": {
+    "back": "All events",
+    "about": "About",
+    "listings": "Tickets for sale",
+    "listingsCount": "{count, plural, one {# listing} other {# listings}}",
+    "soldBy": "Seller",
+    "perTicket": "/ ticket",
+    "available": "{count, plural, =0 {Sold out} other {# available}}",
+    "select": "Select",
+    "selected": "Selected",
+    "yourListing": "Your listing",
+    "noListings": "Nobody is selling tickets for this event yet",
+    "notActive": "This event is no longer accepting purchases"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "pickListing": "Pick a listing to continue",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "subtotal": "Subtotal ({quantity} × {price})",
+    "serviceFee": "Service fee (10%)",
+    "total": "Total",
+    "pay": "Pay with VNPay",
+    "viewDetails": "View details",
+    "hideDetails": "Hide",
+    "escrowTitle": "Protected payment.",
+    "escrowNote": "ReTix holds your payment and only releases it to the seller after the event. Tickets are reserved for you for 15 minutes."
+  },
+  "order": {
+    "title": "Order #{id}",
+    "summary": "Order details",
+    "event": "Event",
+    "seller": "Seller",
+    "tickets": "Tickets",
+    "createdAt": "Ordered at",
+    "paidAt": "Paid at",
+    "backToEvent": "Back to event",
+    "goToWallet": "View my orders",
+    "tryAgain": "Try again",
+    "result": {
+      "PENDING": {
+        "title": "Confirming your payment",
+        "body": "We're waiting for VNPay to confirm. This page updates automatically."
+      },
+      "PAID": {
+        "title": "Payment successful",
+        "body": "Your tickets are booked. Your money is held safely until the event takes place."
+      },
+      "FAILED": {
+        "title": "Payment failed",
+        "body": "The transaction was cancelled or declined. You have not been charged."
+      },
+      "EXPIRED": {
+        "title": "Order expired",
+        "body": "The 15-minute reservation ran out. The tickets went back to the seller."
+      },
+      "REFUND_PENDING": {
+        "title": "Refund in progress",
+        "body": "The event was cancelled. We're refunding your payment."
+      },
+      "REFUNDED": {
+        "title": "Refunded",
+        "body": "Your money has been returned to your payment method."
+      }
+    }
+  },
+  "status": {
+    "order": {
+      "PENDING": "Processing",
+      "PAID": "Paid",
+      "FAILED": "Failed",
+      "EXPIRED": "Expired",
+      "REFUND_PENDING": "Refunding",
+      "REFUNDED": "Refunded"
+    },
+    "event": {
+      "ACTIVE": "On sale",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "wallet": {
+    "title": "My wallet",
+    "subtitle": "Every balance is computed directly from the ledger.",
+    "pending": "Pending (escrow)",
+    "pendingHint": "Ticket sales, released after the event takes place.",
+    "available": "Available",
+    "availableHint": "Released to you and ready to withdraw.",
+    "refundPending": "Refund owed to you",
+    "refundPendingHint": "Money being refunded from cancelled orders.",
+    "myOrders": "My tickets",
+    "noOrders": "You haven't bought any tickets yet",
+    "ledger": "Ledger history",
+    "noLedger": "No transactions yet",
+    "ledgerKind": {
+      "PAYMENT_CAPTURED": "Order payment",
+      "EVENT_SETTLED": "Event payout release",
+      "ORDER_CANCELLED": "Order cancelled",
+      "LATE_PAYMENT": "Late payment",
+      "REFUND_COMPLETED": "Refund"
+    }
+  },
+  "admin": {
+    "title": "Admin",
+    "forbidden": "Switch to the Admin user to view this page.",
+    "events": "Events",
+    "complete": "Mark as completed",
+    "cancel": "Cancel event",
+    "completeHint": "Releases escrowed money to sellers.",
+    "trialBalance": "Trial balance",
+    "trialBalanceHint": "The sum of every ledger account must always be 0.",
+    "account": "Account",
+    "balance": "Balance",
+    "sum": "Sum"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Back to home"
+  }
+}

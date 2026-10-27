@@ -1,0 +1,16 @@
+{
+  "name": "ticket-checkout",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @tc/shared && npm run build -w @tc/api && npm run build -w @tc/web",
+    "dev:api": "npm run dev -w @tc/api",
+    "dev:web": "npm run dev -w @tc/web",
+    "test": "npm run test -w @tc/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}
