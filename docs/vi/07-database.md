@@ -2,6 +2,8 @@
 
 [English](../07-database.md)
 
+Mới làm quen? Đọc [Hướng dẫn đọc database](08-database-guide.md): có sơ đồ và giải thích từng bảng.
+
 PostgreSQL 16 qua Prisma 7 (`apps/api/prisma/schema.prisma`, driver adapter `pg`). Hiện có một
 migration: `prisma/migrations/*_init`. Nửa đầu do Prisma sinh; nửa sau là SQL viết tay cho những
 quy tắc mà ngôn ngữ schema của Prisma không diễn đạt được.

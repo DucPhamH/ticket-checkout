@@ -12,5 +12,6 @@ Nếu mới làm quen với codebase, nên đọc theo thứ tự:
 6. [Sổ cái](06-ledger.md) – tài khoản, bút toán, các bất biến
 7. [Cơ sở dữ liệu](07-database.md) – bảng, ràng buộc, index, dữ liệu mẫu
 8. [Các quyết định](decisions.md) – những chỗ đề bài bỏ ngỏ và lý do chọn
+9. [Hướng dẫn đọc database](08-database-guide.md) – sơ đồ, giải thích từng bảng, một lần mua vé đi qua các bảng, câu hỏi tự kiểm tra
 
 Tài liệu mô tả thiết kế. Phần nào đã thiết kế nhưng chưa làm sẽ được ghi rõ.
