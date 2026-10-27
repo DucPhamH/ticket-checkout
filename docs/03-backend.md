@@ -8,7 +8,7 @@ src/
   app.ts              builds the app (middleware + routers); tests import this directly
   config/env.ts       env vars parsed with zod; the process fails fast if one is missing
   constants/          business constants (reservation window, ledger account codes)
-  db/                 database client
+  db/                 Prisma client (generated into src/generated, not committed)
   lib/                small framework-free helpers (HttpError, money)
   middlewares/        current user, validation, not-found, error handler
   modules/<feature>/

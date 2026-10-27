@@ -1,6 +1,7 @@
 # Ledger
 
-> Status: designed, not yet implemented (plan steps 2–3).
+> Status: tables, constraints and triggers are built and tested (see [Database](07-database.md)).
+> The posting service and balance queries come next.
 
 Every money movement is a double-entry transaction. Balances are never stored; they are sums
 over ledger lines.
@@ -14,7 +15,8 @@ over ledger lines.
   negative = credit.
 
 A deferred constraint trigger checks that each transaction's lines sum to zero at commit, so a
-bug in application code cannot write an unbalanced transaction. Lines are insert-only.
+bug in application code cannot write an unbalanced transaction. Another trigger makes both
+ledger tables append-only. The `account_balances` view gives every balance in one query.
 
 ## Accounts
 

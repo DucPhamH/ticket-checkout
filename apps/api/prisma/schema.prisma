@@ -1,0 +1,311 @@
+// Database schema. Conventions:
+// - Tables and columns are snake_case in Postgres (@@map / @map), camelCase in TypeScript.
+// - Money is BIGINT in whole VND (no minor unit). Never Float/Decimal.
+// - Timestamps are timestamptz with millisecond precision.
+// - Constraints that Prisma cannot express (CHECKs, ledger triggers) live in the SQL migration.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum UserRole {
+  USER
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum EventStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+
+  @@map("event_status")
+}
+
+enum ListingStatus {
+  ACTIVE
+  WITHDRAWN
+
+  @@map("listing_status")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  REFUND_PENDING
+  REFUNDED
+
+  @@map("order_status")
+}
+
+enum PaymentProvider {
+  VNPAY
+
+  @@map("payment_provider")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+
+  @@map("payment_status")
+}
+
+enum PaymentNotificationSource {
+  IPN // server-to-server callback from the gateway
+  RETURN // browser redirect back from the gateway
+  QUERY // our own status query (VNPay querydr)
+
+  @@map("payment_notification_source")
+}
+
+enum RefundStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+
+  @@map("refund_status")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  REVENUE
+
+  @@map("account_type")
+}
+
+enum LedgerTransactionKind {
+  PAYMENT_CAPTURED
+  EVENT_SETTLED
+  ORDER_CANCELLED
+  LATE_PAYMENT
+  REFUND_COMPLETED
+
+  @@map("ledger_transaction_kind")
+}
+
+// ─── Marketplace ──────────────────────────────────────────────────────────────
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  listings Listing[]
+  orders   Order[]
+  accounts Account[]
+
+  @@map("users")
+}
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String      @default("")
+  venue       String
+  city        String
+  startsAt    DateTime    @map("starts_at") @db.Timestamptz(3)
+  status      EventStatus @default(ACTIVE)
+  completedAt DateTime?   @map("completed_at") @db.Timestamptz(3)
+  cancelledAt DateTime?   @map("cancelled_at") @db.Timestamptz(3)
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  listings           Listing[]
+  ledgerTransactions LedgerTransaction[]
+
+  @@index([status, startsAt])
+  @@map("events")
+}
+
+model Listing {
+  id                Int           @id @default(autoincrement())
+  eventId           Int           @map("event_id")
+  sellerId          Int           @map("seller_id")
+  unitPrice         BigInt        @map("unit_price")
+  quantityTotal     Int           @map("quantity_total")
+  // Decremented when an order reserves tickets, restored when it fails or expires.
+  quantityAvailable Int           @map("quantity_available")
+  status            ListingStatus @default(ACTIVE)
+  withdrawnAt       DateTime?     @map("withdrawn_at") @db.Timestamptz(3)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  event  Event   @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  seller User    @relation(fields: [sellerId], references: [id], onDelete: Restrict)
+  orders Order[]
+
+  @@index([eventId, status])
+  @@index([sellerId])
+  @@map("listings")
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  buyerId   Int         @map("buyer_id")
+  listingId Int         @map("listing_id")
+  quantity  Int
+  // Amounts are frozen at checkout so later listing edits never change a placed order.
+  unitPrice BigInt      @map("unit_price")
+  subtotal  BigInt
+  buyerFee  BigInt      @map("buyer_fee")
+  sellerFee BigInt      @map("seller_fee")
+  total     BigInt
+  status    OrderStatus @default(PENDING)
+  // End of the ticket reservation; also sent to the gateway as the payment deadline.
+  expiresAt DateTime    @map("expires_at") @db.Timestamptz(3)
+  paidAt    DateTime?   @map("paid_at") @db.Timestamptz(3)
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  buyer              User                @relation(fields: [buyerId], references: [id], onDelete: Restrict)
+  listing            Listing             @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  payment            Payment?
+  refund             Refund?
+  ledgerTransactions LedgerTransaction[]
+
+  @@index([buyerId, createdAt(sort: Desc)])
+  @@index([listingId])
+  // Expiry sweep: WHERE status = 'PENDING' AND expires_at < now()
+  @@index([status, expiresAt])
+  @@map("orders")
+}
+
+// ─── Payments ─────────────────────────────────────────────────────────────────
+
+// Gateway side of an order, kept apart so the order model stays provider-agnostic.
+model Payment {
+  id                    Int             @id @default(autoincrement())
+  orderId               Int             @unique @map("order_id")
+  provider              PaymentProvider @default(VNPAY)
+  // Our reference sent to the gateway (vnp_TxnRef). Unique per merchant.
+  txnRef                String          @unique @map("txn_ref")
+  amount                BigInt
+  status                PaymentStatus   @default(PENDING)
+  // Filled from the gateway's response; needed later for querydr and refunds.
+  providerTransactionNo String?         @map("provider_transaction_no")
+  providerResponseCode  String?         @map("provider_response_code")
+  providerPayDate       String?         @map("provider_pay_date") // VNPay format yyyyMMddHHmmss (GMT+7)
+  bankCode              String?         @map("bank_code")
+  createdAt             DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  order         Order                 @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  notifications PaymentNotification[]
+  refunds       Refund[]
+
+  @@map("payments")
+}
+
+// Every message from (or query to) the gateway, stored raw before it is acted on.
+// Audit trail for disputes and for debugging IPN delivery.
+model PaymentNotification {
+  id             Int                       @id @default(autoincrement())
+  // Null when the reference does not match any payment (unknown or forged).
+  paymentId      Int?                      @map("payment_id")
+  source         PaymentNotificationSource
+  payload        Json                      @db.JsonB
+  signatureValid Boolean                   @map("signature_valid")
+  // What we answered (IPN RspCode) or concluded.
+  result         String?
+  receivedAt     DateTime                  @default(now()) @map("received_at") @db.Timestamptz(3)
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+
+  @@index([paymentId, receivedAt])
+  @@map("payment_notifications")
+}
+
+model Refund {
+  id               Int          @id @default(autoincrement())
+  // Full refunds only, so at most one per order.
+  orderId          Int          @unique @map("order_id")
+  paymentId        Int          @map("payment_id")
+  amount           BigInt
+  status           RefundStatus @default(PENDING)
+  reason           String
+  attempts         Int          @default(0)
+  lastError        String?      @map("last_error")
+  providerResponse Json?        @map("provider_response") @db.JsonB
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  completedAt      DateTime?    @map("completed_at") @db.Timestamptz(3)
+
+  order              Order               @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  payment            Payment             @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  ledgerTransactions LedgerTransaction[]
+
+  @@index([status])
+  @@index([paymentId])
+  @@map("refunds")
+}
+
+// ─── Ledger (double-entry) ────────────────────────────────────────────────────
+// Balances are never stored: an account's balance is the sum of its entries.
+// The migration adds triggers that (1) reject any transaction whose entries do not
+// sum to zero and (2) make both ledger tables append-only.
+
+model Account {
+  id        Int         @id @default(autoincrement())
+  // e.g. platform:gateway_clearing, seller:3:pending, buyer:5:refund_payable
+  code      String      @unique
+  type      AccountType
+  userId    Int?        @map("user_id")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user    User?         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  entries LedgerEntry[]
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model LedgerTransaction {
+  id             Int                   @id @default(autoincrement())
+  kind           LedgerTransactionKind
+  // Makes posting safe to retry: e.g. capture:order:42, settle:event:7:order:42
+  idempotencyKey String                @unique @map("idempotency_key")
+  orderId        Int?                  @map("order_id")
+  eventId        Int?                  @map("event_id")
+  refundId       Int?                  @map("refund_id")
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  order   Order?        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  event   Event?        @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  refund  Refund?       @relation(fields: [refundId], references: [id], onDelete: Restrict)
+  entries LedgerEntry[]
+
+  @@index([orderId])
+  @@index([eventId])
+  @@index([refundId])
+  @@map("ledger_transactions")
+}
+
+model LedgerEntry {
+  id            Int    @id @default(autoincrement())
+  transactionId Int    @map("transaction_id")
+  accountId     Int    @map("account_id")
+  // Signed: positive = debit, negative = credit.
+  amount        BigInt
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  account     Account           @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([accountId])
+  @@index([transactionId])
+  @@map("ledger_entries")
+}

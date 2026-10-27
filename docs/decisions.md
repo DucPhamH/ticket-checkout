@@ -41,3 +41,15 @@ they exercise the ledger in both directions.
 
 **Next.js agent files disabled** (`agentRules: false`). Next 16 writes `AGENTS.md` on `next dev`;
 we don't keep generated tool files in the repo.
+
+**Prisma 7 (stable), not 8.** npm currently tags an 8.0 release candidate as `latest`; 7.10 is
+the newest stable release.
+
+**Database rules duplicated in SQL.** CHECK constraints and ledger triggers back up the
+application logic, so a bug cannot write an inconsistent order or an unbalanced ledger.
+
+**`payments` separate from `orders`.** See [Database](07-database.md#tables).
+
+**Integer ids.** Simple and readable in a demo. Sequential order ids in URLs would be a problem
+with real users (enumeration); with authentication and ownership checks it matters less, and
+a public random reference could be added.

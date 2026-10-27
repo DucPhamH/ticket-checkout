@@ -36,8 +36,11 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run build -w @tc/shared
+      - run: npm run db:generate -w @tc/api
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run db:deploy -w @tc/api
+      - run: npm run db:seed -w @tc/api
       - run: npm test
       - run: npm run build
 

@@ -11,7 +11,9 @@ RUN npm ci --workspace @tc/api --include-workspace-root
 COPY tsconfig.base.json ./
 COPY packages/shared packages/shared
 COPY apps/api apps/api
-RUN npm run build -w @tc/shared && npm run build -w @tc/api
+# prisma generate reads the config, which requires DATABASE_URL; it does not connect.
+RUN npm run build -w @tc/shared && DATABASE_URL=postgresql://build:build@localhost:5432/build npm run build -w @tc/api
 
 EXPOSE 4000
-CMD ["npm", "run", "start", "-w", "@tc/api"]
+# Apply pending migrations and seed (idempotent) before serving.
+CMD ["npm", "run", "start:docker", "-w", "@tc/api"]

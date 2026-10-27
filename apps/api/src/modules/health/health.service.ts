@@ -1,10 +1,10 @@
 import type { HealthResponse } from '@tc/shared';
-import { pool } from '../../db/pool';
+import { prisma } from '../../db/prisma';
 
 export async function getHealth(): Promise<HealthResponse> {
   let db: HealthResponse['db'] = 'ok';
   try {
-    await pool.query('SELECT 1');
+    await prisma.$queryRaw`SELECT 1`;
   } catch {
     db = 'down';
   }
