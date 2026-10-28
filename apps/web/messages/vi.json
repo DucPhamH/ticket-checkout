@@ -89,7 +89,7 @@
       },
       "REFUND_PENDING": {
         "title": "Đang hoàn tiền",
-        "body": "Sự kiện đã bị huỷ. Chúng tôi đang hoàn tiền về tài khoản của bạn."
+        "body": "Bạn đã thanh toán nhưng không thể nhận vé (sự kiện bị huỷ hoặc đã kết thúc, hay vé đã bán hết). Chúng tôi đang hoàn lại toàn bộ số tiền."
       },
       "REFUNDED": {
         "title": "Đã hoàn tiền",
@@ -158,9 +158,29 @@
       "EVENT_CANCELLED": "Sự kiện đã bị huỷ, không thể giải ngân.",
       "EVENT_NOT_FOUND": "Không tìm thấy sự kiện.",
       "ADMIN_ONLY": "Chỉ Admin mới làm được việc này.",
-      "UNKNOWN": "Có lỗi xảy ra, hãy thử lại."
+      "UNKNOWN": "Có lỗi xảy ra, hãy thử lại.",
+      "EVENT_COMPLETED": "Sự kiện đã diễn ra, không thể huỷ.",
+      "REFUND_NOT_FOUND": "Không tìm thấy khoản hoàn tiền."
     },
-    "settledAt": "Đã giải ngân escrow lúc {date}"
+    "settledAt": "Đã giải ngân escrow lúc {date}",
+    "confirmCancel": "Xác nhận huỷ và hoàn tiền",
+    "cancelHint": "Sự kiện chuyển sang Đã huỷ. Mọi đơn đã thanh toán được hoàn toàn bộ tiền qua VNPay; người bán không nhận được gì.",
+    "cancelled": "Đã huỷ {orders} đơn. {failed, plural, =0 {Đã hoàn tiền hết.} other {# khoản hoàn tiền chưa thành công, hãy thử lại ở mục Hoàn tiền.}}",
+    "cancelledAt": "Đã huỷ lúc {date}",
+    "refunds": "Hoàn tiền",
+    "noRefunds": "Chưa có khoản hoàn tiền nào",
+    "retryRefund": "Gửi lại VNPay",
+    "attempts": "{count} lần gửi",
+    "refundReason": {
+      "LATE_PAYMENT": "Thanh toán trễ, vé đã bán",
+      "EVENT_ENDED": "Thanh toán sau khi sự kiện kết thúc",
+      "EVENT_CANCELLED": "Sự kiện bị huỷ"
+    },
+    "refundStatus": {
+      "PENDING": "Chờ gửi",
+      "FAILED": "Lỗi",
+      "SUCCEEDED": "Đã hoàn"
+    }
   },
   "notFound": {
     "title": "Không tìm thấy trang",

@@ -5,7 +5,8 @@ import { TrialBalance } from '@/features/admin/components/trial-balance';
 import { Container } from '@/components/layout/container';
 import { EmptyState } from '@/components/ui/empty-state';
 import { getCurrentUser } from '@/features/users/api';
-import { getTrialBalance, listAdminEvents } from '@/features/admin/api';
+import { getTrialBalance, listAdminEvents, listRefunds } from '@/features/admin/api';
+import { RefundList } from '@/features/admin/components/refund-list';
 
 export default async function AdminPage({ params }: PageProps<'/[locale]/admin'>) {
   const { locale } = await params;
@@ -19,7 +20,7 @@ export default async function AdminPage({ params }: PageProps<'/[locale]/admin'>
     );
   }
 
-  const [events, trialBalance] = await Promise.all([listAdminEvents(), getTrialBalance()]);
+  const [events, trialBalance, refunds] = await Promise.all([listAdminEvents(), getTrialBalance(), listRefunds()]);
 
   return (
     <Container className="space-y-6 py-6 sm:py-10">
@@ -27,6 +28,7 @@ export default async function AdminPage({ params }: PageProps<'/[locale]/admin'>
       <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <EventAdminList page={events} locale={locale} />
         <TrialBalance trialBalance={trialBalance} locale={locale} />
+        <RefundList page={refunds} locale={locale} />
       </div>
     </Container>
   );

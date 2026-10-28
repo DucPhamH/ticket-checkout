@@ -89,7 +89,7 @@
       },
       "REFUND_PENDING": {
         "title": "Refund in progress",
-        "body": "The event was cancelled. We're refunding your payment."
+        "body": "You paid, but no ticket can be given (the event was cancelled or has ended, or the tickets sold out). We are refunding the full amount."
       },
       "REFUNDED": {
         "title": "Refunded",
@@ -158,9 +158,29 @@
       "EVENT_CANCELLED": "This event was cancelled and cannot be settled.",
       "EVENT_NOT_FOUND": "Event not found.",
       "ADMIN_ONLY": "Only an admin can do this.",
-      "UNKNOWN": "Something went wrong. Please try again."
+      "UNKNOWN": "Something went wrong. Please try again.",
+      "EVENT_COMPLETED": "This event already took place and cannot be cancelled.",
+      "REFUND_NOT_FOUND": "Refund not found."
     },
-    "settledAt": "Escrow released on {date}"
+    "settledAt": "Escrow released on {date}",
+    "confirmCancel": "Confirm cancel and refund",
+    "cancelHint": "The event becomes cancelled. Every paid order is refunded in full through VNPay; sellers receive nothing.",
+    "cancelled": "Cancelled {orders, plural, one {# order} other {# orders}}. {failed, plural, =0 {All refunded.} one {# refund did not go through; retry it under Refunds.} other {# refunds did not go through; retry them under Refunds.}}",
+    "cancelledAt": "Cancelled on {date}",
+    "refunds": "Refunds",
+    "noRefunds": "No refunds yet",
+    "retryRefund": "Send to VNPay again",
+    "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+    "refundReason": {
+      "LATE_PAYMENT": "Paid late, tickets sold",
+      "EVENT_ENDED": "Paid after the event ended",
+      "EVENT_CANCELLED": "Event cancelled"
+    },
+    "refundStatus": {
+      "PENDING": "Not sent",
+      "FAILED": "Failed",
+      "SUCCEEDED": "Refunded"
+    }
   },
   "notFound": {
     "title": "Page not found",

@@ -1,9 +1,9 @@
 import { useTranslations } from 'next-intl';
 import type { AdminEventDto } from '@tc/shared';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { EVENT_STATUS_VARIANT } from '@/constants/status-styles';
 import { formatDateTime, formatVnd } from '@/lib/format';
+import { CancelEventButton } from './cancel-event-button';
 import { CompleteEventButton } from './complete-event-button';
 
 export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale: string }) {
@@ -26,12 +26,15 @@ export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale:
           {t('admin.settledAt', { date: formatDateTime(event.completedAt, locale) })}
         </p>
       )}
+      {event.cancelledAt && (
+        <p className="text-xs text-red-600">
+          {t('admin.cancelledAt', { date: formatDateTime(event.cancelledAt, locale) })}
+        </p>
+      )}
       {event.status === 'ACTIVE' && (
         <div className="flex flex-wrap items-start gap-2">
           <CompleteEventButton eventId={event.id} locale={locale} />
-          <Button size="sm" variant="outline" className="text-red-600">
-            {t('admin.cancel')}
-          </Button>
+          <CancelEventButton eventId={event.id} />
         </div>
       )}
     </li>

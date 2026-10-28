@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/06-ledger.md)
 
-> Status: tables, constraints, triggers, the posting service, balance queries and event settlement
-> are built and tested. Cancellation and refunds come later.
+> Status: tables, constraints, triggers, the posting service, balance queries, event settlement,
+> cancellation and refunds are built and tested.
 
 Every money movement is a double-entry transaction. Balances are never stored; they are sums
 over ledger lines.
@@ -116,3 +116,20 @@ order and applying a successful payment both take a `FOR SHARE` lock on the even
 Lock order is always order → payment → event for payments, and the completion locks only the
 event, so they cannot deadlock. `test/modules/event-completion.test.ts` races the two ten times;
 without the shared lock it leaves money stuck in escrow.
+
+## Cancelling an event and refunding (built)
+
+`POST /admin/events/:id/cancel` (`modules/events/event-cancellation.ts`):
+
+1. One transaction, event locked `FOR UPDATE` as above: the event becomes `CANCELLED`; every `PAID`
+   order becomes `REFUND_PENDING`, gets a `refunds` row (reason `EVENT_CANCELLED`) and an
+   `ORDER_CANCELLED` posting (key `cancel:order:<id>`) that moves its money out of escrow into the
+   buyer's `refund_payable`.
+2. After the commit, each refund is sent to VNPay (`payments/payments.refund.ts`). Success posts
+   `REFUND_COMPLETED` (key `refund:<id>`) and the order becomes `REFUNDED`. A refusal or an
+   unreachable gateway leaves the refund `FAILED` with `last_error`; the admin retries it from the
+   refunds list (`POST /admin/refunds/:id/retry`). The cancellation itself is never undone.
+
+The refund row is locked `FOR UPDATE` while VNPay answers, so two retries clicked at once send it
+once (tested). Refunds from late payments (`LATE_PAYMENT`, `EVENT_ENDED`) go through the same path.
+A completed event cannot be cancelled: its escrow already went to the sellers.

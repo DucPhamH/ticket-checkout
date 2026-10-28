@@ -2,8 +2,8 @@
 
 [English](../06-ledger.md)
 
-> Trạng thái: bảng, ràng buộc, trigger, service ghi bút toán, truy vấn số dư và giải ngân sự kiện đã
-> làm và có test. Huỷ sự kiện và hoàn tiền làm sau.
+> Trạng thái: bảng, ràng buộc, trigger, service ghi bút toán, truy vấn số dư, giải ngân, huỷ sự kiện
+> và hoàn tiền đã làm và có test.
 
 Mỗi lần tiền di chuyển là một giao dịch bút toán kép (double-entry). Số dư không bao giờ được
 lưu sẵn; nó là tổng các dòng trong sổ cái.
@@ -115,3 +115,20 @@ nhận thanh toán thành công đều khoá `FOR SHARE` dòng sự kiện (`eve
 Với thanh toán, thứ tự khoá luôn là đơn → payment → sự kiện; giải ngân chỉ khoá sự kiện, nên hai
 bên không thể chờ nhau thành vòng (deadlock). `test/modules/event-completion.test.ts` cho hai việc
 chạy đua 10 lần; bỏ khoá chia sẻ thì có tiền bị kẹt trong escrow.
+
+## Huỷ sự kiện và hoàn tiền (đã làm)
+
+`POST /admin/events/:id/cancel` (`modules/events/event-cancellation.ts`):
+
+1. Một transaction, khoá sự kiện `FOR UPDATE` như trên: sự kiện thành `CANCELLED`; mỗi đơn `PAID`
+   thành `REFUND_PENDING`, có một dòng `refunds` (lý do `EVENT_CANCELLED`) và bút toán
+   `ORDER_CANCELLED` (key `cancel:order:<id>`) đưa tiền ra khỏi escrow, vào `refund_payable` của
+   người mua.
+2. Sau khi commit, từng khoản hoàn được gửi tới VNPay (`payments/payments.refund.ts`). Thành công
+   thì ghi `REFUND_COMPLETED` (key `refund:<id>`) và đơn thành `REFUNDED`. VNPay từ chối hoặc không
+   gọi được thì khoản hoàn ở trạng thái `FAILED` kèm `last_error`; admin bấm gửi lại ở danh sách
+   hoàn tiền (`POST /admin/refunds/:id/retry`). Việc huỷ không bao giờ bị đảo ngược.
+
+Dòng `refunds` bị khoá `FOR UPDATE` trong lúc chờ VNPay trả lời, nên bấm gửi lại hai lần cùng lúc
+chỉ gửi một lần (có test). Khoản hoàn do thanh toán trễ (`LATE_PAYMENT`, `EVENT_ENDED`) đi cùng
+đường này. Sự kiện đã diễn ra thì không huỷ được: escrow đã giải ngân cho người bán.
