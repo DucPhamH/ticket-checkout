@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app';
 import { prisma } from '../../../src/db/prisma';
 import { signVnpayParams } from '../../../src/modules/payments/vnpay/vnpay.signature';
+import { expireAllStaleOrders } from '../../../src/modules/orders/order-expiry';
 
 const app = createApp();
 const SECRET = 'TEST_SECRET_FOR_UNIT_TESTS_ONLY';
@@ -231,5 +232,26 @@ describe('ledger stays balanced', () => {
     const sums = await prisma.ledgerEntry.groupBy({ by: ['transactionId'], _sum: { amount: true } });
     expect(sums.length).toBeGreaterThan(0);
     expect(sums.every((row) => row._sum.amount === 0n)).toBe(true);
+  });
+});
+
+describe('failed IPN racing the expiry sweep', () => {
+  it('releases the tickets exactly once, whichever runs first (10 races)', async () => {
+    for (let round = 0; round < 10; round++) {
+      const listing = await makeListing(1); // 1 ticket in total
+      const { orderId, payment } = await buy(listing.id); // now 0 left
+      // Past its reservation, so the sweep also wants to release it.
+      await prisma.order.update({ where: { id: orderId }, data: { expiresAt: PAST() } });
+
+      const [ipnRes] = await Promise.all([
+        ipn(ipnParams(payment.txnRef, payment.amount, '51', '02')), // insufficient funds
+        expireAllStaleOrders(),
+      ]);
+
+      expect(ipnRes.body.RspCode).toBe('00');
+      expect(await availableOf(listing.id)).toBe(1); // released once: never 2
+      expect(['FAILED', 'EXPIRED']).toContain((await orderOf(orderId)).status);
+      expect(await paymentOf(payment.id)).toMatchObject({ status: 'FAILED', providerResponseCode: '51' });
+    }
   });
 });
