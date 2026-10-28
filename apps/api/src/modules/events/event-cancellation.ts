@@ -25,8 +25,9 @@ export type CancellationResult = {
  * 2. After the commit, each refund is sent to VNPay. A failure does not undo the cancellation:
  *    the refund stays FAILED, visible to the admin, and can be retried.
  *
- * A payment that lands after the cancellation is refunded too (reason EVENT_ENDED). A completed
- * event cannot be cancelled: its escrow has already been released to the sellers.
+ * A payment that lands after the cancellation is refunded too (reason EVENT_ENDED). Only an event
+ * that has not started can be cancelled: once it starts it is completed instead, and a completed
+ * event's escrow has already been released to the sellers.
  */
 export async function cancelEvent(eventId: number, createdBy: string): Promise<CancellationResult> {
   const { cancelledAt, refundIds } = await prisma.$transaction(async (tx) => {
@@ -35,10 +36,14 @@ export async function cancelEvent(eventId: number, createdBy: string): Promise<C
     if (status === EventStatus.COMPLETED) {
       throw HttpError.conflict('EVENT_COMPLETED', 'A completed event cannot be cancelled');
     }
+    const current = await tx.event.findUniqueOrThrow({ where: { id: eventId } });
+    if (status === EventStatus.ACTIVE && current.startsAt <= new Date()) {
+      throw HttpError.conflict('EVENT_STARTED', 'An event that has started cannot be cancelled; complete it instead');
+    }
 
     const event =
       status === EventStatus.CANCELLED
-        ? await tx.event.findUniqueOrThrow({ where: { id: eventId } })
+        ? current
         : await tx.event.update({
             where: { id: eventId },
             data: { status: EventStatus.CANCELLED, cancelledAt: new Date() },

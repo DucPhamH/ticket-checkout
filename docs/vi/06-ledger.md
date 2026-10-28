@@ -131,4 +131,5 @@ chạy đua 10 lần; bỏ khoá chia sẻ thì có tiền bị kẹt trong escr
 
 Dòng `refunds` bị khoá `FOR UPDATE` trong lúc chờ VNPay trả lời, nên bấm gửi lại hai lần cùng lúc
 chỉ gửi một lần (có test). Khoản hoàn do thanh toán trễ (`LATE_PAYMENT`, `EVENT_ENDED`) đi cùng
-đường này. Sự kiện đã diễn ra thì không huỷ được: escrow đã giải ngân cho người bán.
+đường này. Chỉ huỷ được sự kiện chưa bắt đầu (409 `EVENT_STARTED`): đã bắt đầu thì phải đánh dấu đã diễn
+ra, và sự kiện đã diễn ra thì escrow đã giải ngân cho người bán.

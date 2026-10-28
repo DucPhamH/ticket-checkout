@@ -140,6 +140,18 @@ describe('POST /admin/events/:id/cancel', () => {
     expect((await getTrialBalance()).total).toBe(0n);
   });
 
+  it('refuses an event that has already started', async () => {
+    const { eventId, listingId } = await eventWithListing();
+    await paySucceeds(await buy(listingId, 1));
+    await prisma.event.update({ where: { id: eventId }, data: { startsAt: new Date(Date.now() - 60_000) } });
+
+    const res = await cancel(eventId);
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('EVENT_STARTED');
+    expect(await prisma.event.findUniqueOrThrow({ where: { id: eventId } })).toMatchObject({ status: 'ACTIVE' });
+  });
+
   it('refuses a completed event, an unknown event and a non-admin', async () => {
     const { eventId } = await eventWithListing();
     await request(app).post(`/admin/events/${eventId}/complete`).set('X-User-Id', ADMIN);

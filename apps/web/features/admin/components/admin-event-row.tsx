@@ -34,7 +34,8 @@ export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale:
       {event.status === 'ACTIVE' && (
         <div className="flex flex-wrap items-start gap-2">
           <CompleteEventButton eventId={event.id} locale={locale} />
-          <CancelEventButton eventId={event.id} />
+          {/* Once an event has started it can only be completed, not cancelled. */}
+          {new Date(event.startsAt) > new Date() && <CancelEventButton eventId={event.id} />}
         </div>
       )}
     </li>

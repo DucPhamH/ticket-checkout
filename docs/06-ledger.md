@@ -132,4 +132,5 @@ without the shared lock it leaves money stuck in escrow.
 
 The refund row is locked `FOR UPDATE` while VNPay answers, so two retries clicked at once send it
 once (tested). Refunds from late payments (`LATE_PAYMENT`, `EVENT_ENDED`) go through the same path.
-A completed event cannot be cancelled: its escrow already went to the sellers.
+Only an event that has not started can be cancelled (409 `EVENT_STARTED`): once it starts, it is
+completed instead, and a completed event's escrow already went to the sellers.

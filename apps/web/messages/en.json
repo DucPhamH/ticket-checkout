@@ -173,7 +173,8 @@
       "ADMIN_ONLY": "Only an admin can do this.",
       "UNKNOWN": "Something went wrong. Please try again.",
       "EVENT_COMPLETED": "This event already took place and cannot be cancelled.",
-      "REFUND_NOT_FOUND": "Refund not found."
+      "REFUND_NOT_FOUND": "Refund not found.",
+      "EVENT_STARTED": "This event has started and can no longer be cancelled. Mark it as taken place instead."
     },
     "settledAt": "Escrow released on {date}",
     "confirmCancel": "Confirm cancel and refund",

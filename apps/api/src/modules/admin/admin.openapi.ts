@@ -102,7 +102,7 @@ export const adminPaths: ZodOpenApiPathsObject = {
       description:
         'Sets the event to `CANCELLED`. Every paid order becomes `REFUND_PENDING` and its money moves from escrow ' +
         'to what we owe the buyer (`ORDER_CANCELLED`); then each refund is sent to VNPay. Failed refunds stay ' +
-        'listed for a retry. Idempotent. A completed event cannot be cancelled.',
+        'listed for a retry. Idempotent. Only an event that has not started can be cancelled.',
       security: [{ userId: [] }],
       requestParams: { path: EventIdParamsSchema },
       responses: {
@@ -110,7 +110,7 @@ export const adminPaths: ZodOpenApiPathsObject = {
         '400': errorResponse('`id` is not a positive integer'),
         ...adminErrors,
         '404': errorResponse('No such event (`EVENT_NOT_FOUND`)'),
-        '409': errorResponse('The event already took place (`EVENT_COMPLETED`)'),
+        '409': errorResponse('The event has started (`EVENT_STARTED`) or already took place (`EVENT_COMPLETED`)'),
       },
     },
   },

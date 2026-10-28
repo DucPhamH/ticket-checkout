@@ -38,13 +38,10 @@ export const OrderSchema = z
     createdAt: isoDate,
     expiresAt: isoDate.meta({ description: 'End of the ticket reservation' }),
     paidAt: isoDate.nullable(),
-    paymentResultCode: z
-      .string()
-      .nullable()
-      .meta({
-        description: 'VNPay result code of the payment (24 = cancelled, 51 = insufficient funds…)',
-        example: null,
-      }),
+    paymentResultCode: z.string().nullable().meta({
+      description: 'VNPay result code of the payment (24 = cancelled, 51 = insufficient funds…)',
+      example: null,
+    }),
   })
   .meta({ id: 'Order' }) satisfies z.ZodType<OrderDto>;
 
