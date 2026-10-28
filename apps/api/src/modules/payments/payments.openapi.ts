@@ -2,7 +2,30 @@ import { z } from 'zod';
 import type { ZodOpenApiPathsObject } from 'zod-openapi';
 import { ReturnParamsSchema } from './payments.schema';
 
+const IpnResponseSchema = z
+  .object({
+    RspCode: z.enum(['00', '01', '02', '04', '97', '99']),
+    Message: z.string().meta({ example: 'Confirm Success' }),
+  })
+  .meta({ id: 'VnpayIpnResponse' });
+
 export const paymentsPaths: ZodOpenApiPathsObject = {
+  '/payments/vnpay/ipn': {
+    get: {
+      tags: ['Payments'],
+      summary: 'VNPay IPN (server-to-server)',
+      description:
+        'Called by VNPay with the same `vnp_*` parameters as the return URL. The source of truth for a payment: ' +
+        'on success the order becomes `PAID` and the payment is posted to the ledger; on failure the order ' +
+        'becomes `FAILED` and its tickets are released; a success after the tickets were released is recorded ' +
+        'and owed back to the buyer. Always HTTP 200. `RspCode`: 00 done, 01 unknown reference, 02 already ' +
+        'processed, 04 wrong amount, 97 bad signature, 99 missing input or unexpected error (VNPay retries ' +
+        'anything but 00/02).',
+      responses: {
+        '200': { description: 'Answer for VNPay', content: { 'application/json': { schema: IpnResponseSchema } } },
+      },
+    },
+  },
   '/payments/vnpay/return/{locale}': {
     get: {
       tags: ['Payments'],

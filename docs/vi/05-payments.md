@@ -2,8 +2,8 @@
 
 [English](../05-payments.md)
 
-> Trạng thái: phần ký, tạo payment và return URL đã làm, đã thử với sandbox bằng thẻ test NCB. IPN làm
-> tiếp theo.
+> Trạng thái: phần ký, tạo payment, return URL và IPN đã làm. IPN được thử ở máy bằng script giả lập;
+> nhận IPN thật từ VNPay qua tunnel và đối soát `querydr` làm tiếp theo.
 
 ## Vì sao chọn VNPay
 
@@ -115,3 +115,31 @@ web chuyển trình duyệt sang `paymentUrl`.
 Endpoint này không bao giờ đổi trạng thái đơn hay payment. Đã thử với sandbox và thẻ test NCB: chữ ký
 VNPay gửi về được xác thực đúng, kết luận `REPORTED_SUCCESS`, và đơn vẫn `PENDING` cho tới khi có IPN.
 Đơn đó sau đó hết hạn, đúng lỗ hổng mà IPN và `querydr` sẽ lấp.
+
+## IPN (đã làm)
+
+`GET /payments/vnpay/ipn` (`modules/payments/payments.ipn.ts`), luôn trả HTTP 200 với
+`{ RspCode, Message }`:
+
+1. Thiếu tham số → `99`; sai chữ ký → `97`; `vnp_TxnRef` lạ → `01`.
+2. Trong một transaction, khoá đơn rồi mới khoá payment (cùng thứ tự với lượt quét hết hạn, nên hai bên
+   không bao giờ deadlock, và IPN trùng phải xếp hàng): số tiền ≠ payment × 100 → `04`; đã áp dụng kết
+   quả từ cổng rồi → `02`.
+3. Thành công (`vnp_ResponseCode` và `vnp_TransactionStatus` đều `00`):
+   - đơn vẫn `PENDING` (kể cả đã quá `expires_at`, vé vẫn đang được giữ) → `PAID`, payment `SUCCEEDED`,
+     ghi sổ `PAYMENT_CAPTURED`;
+   - đơn `EXPIRED` nhưng vé vẫn còn bán → giữ lại vé, xử lý như trên;
+   - đơn `EXPIRED` và vé đã hết → đơn `REFUND_PENDING`, tạo dòng `refunds`, ghi sổ `LATE_PAYMENT` (nợ
+     hoàn người mua).
+4. Thất bại → payment `FAILED`; đơn còn `PENDING` thì chuyển `FAILED` và trả vé ngay.
+5. Trả `00` khi đã xử lý xong. Lỗi bất ngờ thì huỷ toàn bộ transaction và trả `99`, để VNPay gọi lại.
+
+Mọi lần gọi đều được lưu vào `payment_notifications` (`source = IPN`) kèm mã mình đã trả lời, ở ngoài
+transaction xử lý nên vẫn còn kể cả khi transaction bị huỷ.
+
+Đã test: thành công kèm đúng từng dòng sổ cái, IPN gửi lặp và gửi đồng thời (chỉ ghi sổ một lần, sau đó
+`02`), thanh toán sau `expires_at`, cứu đơn sau khi hết hạn, nợ hoàn tiền khi vé đã bán cho người khác,
+ba mã thất bại, và `97`/`01`/`04`/`99`.
+
+Ở máy local, `npm run vnpay:simulate-ipn -w @tc/api -- <mã đơn> [mã kết quả]` đóng vai VNPay: ký một IPN
+bằng secret thật rồi gửi tới api đang chạy.

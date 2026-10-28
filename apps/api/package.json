@@ -16,7 +16,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "vnpay:simulate-ipn": "tsx scripts/simulate-ipn.ts"
   },
   "dependencies": {
     "@tc/shared": "^0.0.0",

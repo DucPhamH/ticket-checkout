@@ -94,3 +94,15 @@ npm run db:studio -w @tc/api                       # browse tables in the browse
 docker compose exec db psql -U tc -d tc            # SQL prompt (\q to quit)
 docker compose logs -f db                          # Postgres server log
 ```
+
+## Simulating VNPay's IPN
+
+Until VNPay can reach this machine (tunnel), play its part:
+
+```bash
+npm run vnpay:simulate-ipn -w @tc/api -- 635        # success: order 635 becomes PAID
+npm run vnpay:simulate-ipn -w @tc/api -- 636 24     # buyer cancelled: FAILED, tickets released
+```
+
+It signs the IPN with the real `VNP_HASH_SECRET` and sends it to `API_PUBLIC_URL`, so the api must be
+running.

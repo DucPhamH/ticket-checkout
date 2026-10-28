@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/05-payments.md)
 
-> Status: signing, payment creation and the return URL are built and tested against the sandbox with
-> the NCB test card. IPN comes next.
+> Status: signing, payment creation, the return URL and IPN are built. IPN is tested locally with a
+> simulator; receiving it from VNPay through the tunnel, and `querydr` reconciliation, come next.
 
 ## Why VNPay
 
@@ -114,3 +114,31 @@ the logic stays readable.
 It never changes the order or the payment. Tested with the sandbox and the NCB test card: VNPay's
 own signature on the return verified, the result was `REPORTED_SUCCESS`, and the order stayed
 `PENDING` until IPN. That order then expired, which is exactly the gap IPN and `querydr` close.
+
+## IPN (built)
+
+`GET /payments/vnpay/ipn` (`modules/payments/payments.ipn.ts`), always HTTP 200 with
+`{ RspCode, Message }`:
+
+1. Missing input → `99`; bad signature → `97`; unknown `vnp_TxnRef` → `01`.
+2. In one transaction, locking the order then the payment (the expiry sweep's order, so the two never
+   deadlock, and duplicate IPNs queue up): amount ≠ payment × 100 → `04`; a gateway result already
+   applied → `02`.
+3. Success (`vnp_ResponseCode` and `vnp_TransactionStatus` both `00`):
+   - order still `PENDING` (even past `expires_at`, the tickets are still held) → `PAID`, payment
+     `SUCCEEDED`, ledger `PAYMENT_CAPTURED`;
+   - order `EXPIRED` but the tickets are still on sale → take them again, same as above;
+   - order `EXPIRED` and the tickets are gone → order `REFUND_PENDING`, a `refunds` row, ledger
+     `LATE_PAYMENT` (owed back to the buyer).
+4. Failure → payment `FAILED`; a still-pending order becomes `FAILED` and releases its tickets at once.
+5. `00` once applied. Unexpected errors roll everything back and answer `99`, so VNPay retries.
+
+Every call is stored in `payment_notifications` (`source = IPN`) with the code we answered, outside
+the processing transaction so it survives a rollback.
+
+Tested: success with the exact ledger lines, repeated and concurrent duplicates (one posting, then
+`02`), payment after `expires_at`, rescue after expiry, refund owed when the tickets were resold,
+three failure codes, and `97`/`01`/`04`/`99`.
+
+Locally, `npm run vnpay:simulate-ipn -w @tc/api -- <orderId> [responseCode]` plays VNPay: it signs
+an IPN with the real secret and sends it to the running api.

@@ -104,3 +104,14 @@ npm run db:studio -w @tc/api                       # xem bảng trên trình duy
 docker compose exec db psql -U tc -d tc            # gõ SQL trực tiếp (\q để thoát)
 docker compose logs -f db                          # log của server Postgres
 ```
+
+## Giả lập IPN của VNPay
+
+Trong lúc VNPay chưa gọi được vào máy này (chưa có tunnel), dùng script đóng vai VNPay:
+
+```bash
+npm run vnpay:simulate-ipn -w @tc/api -- 635        # thành công: đơn 635 thành PAID
+npm run vnpay:simulate-ipn -w @tc/api -- 636 24     # khách huỷ: FAILED, trả vé
+```
+
+Script ký IPN bằng `VNP_HASH_SECRET` thật rồi gửi tới `API_PUBLIC_URL`, nên api phải đang chạy.
