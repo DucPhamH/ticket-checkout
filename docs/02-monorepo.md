@@ -64,3 +64,12 @@ npm run format     Prettier (with Tailwind class sorting)
 
 `.github/workflows/ci.yml` runs on every push: format check, lint, typecheck, tests (against a
 Postgres service container), production build, and `docker compose build`.
+
+## Test database
+
+`npm test` never touches the dev database. Vitest's global setup
+(`apps/api/test/setup/global-setup.ts`) drops and recreates `tc_test` next to it, applies every
+migration and seeds it, then the suite runs against that. Tests can therefore write ledger rows,
+which can never be deleted, and every run starts from the same state. As a safety catch the setup
+refuses to recreate any database whose name does not end in `_test`. CI uses the same mechanism
+against its Postgres service.

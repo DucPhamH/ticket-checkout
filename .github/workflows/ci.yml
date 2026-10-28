@@ -39,8 +39,7 @@ jobs:
       - run: npm run db:generate -w @tc/api
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm run db:deploy -w @tc/api
-      - run: npm run db:seed -w @tc/api
+      # The test suite creates, migrates and seeds its own tc_test database.
       - run: npm test
       - run: npm run build
 

@@ -19,7 +19,7 @@ async function inRolledBackTx(fn: (tx: Prisma.TransactionClient) => Promise<void
 // Deferred constraint triggers normally run at COMMIT; this forces them to run now.
 const checkDeferredNow = (tx: Prisma.TransactionClient) => tx.$executeRaw`SET CONSTRAINTS ALL IMMEDIATE`;
 
-async function postTransaction(tx: Prisma.TransactionClient, key: string, amounts: bigint[]) {
+async function insertRawLedgerRows(tx: Prisma.TransactionClient, key: string, amounts: bigint[]) {
   const [a, b] = await tx.account.findMany({ orderBy: { id: 'asc' }, take: 2 });
   const ledgerTx = await tx.ledgerTransaction.create({ data: { kind: 'PAYMENT_CAPTURED', idempotencyKey: key } });
   for (const [i, amount] of amounts.entries()) {
@@ -35,14 +35,14 @@ afterAll(() => prisma.$disconnect());
 describe('ledger', () => {
   it('accepts a balanced transaction', async () => {
     await inRolledBackTx(async (tx) => {
-      await postTransaction(tx, 'test:balanced', [100n, -100n]);
+      await insertRawLedgerRows(tx, 'test:balanced', [100n, -100n]);
       await checkDeferredNow(tx);
     });
   });
 
   it('rejects a transaction whose entries do not sum to zero', async () => {
     await inRolledBackTx(async (tx) => {
-      await postTransaction(tx, 'test:unbalanced', [100n, -60n]);
+      await insertRawLedgerRows(tx, 'test:unbalanced', [100n, -60n]);
       await expect(checkDeferredNow(tx)).rejects.toThrow(/unbalanced: entries sum to 40/);
     });
   });
@@ -56,13 +56,13 @@ describe('ledger', () => {
 
   it('rejects a zero amount line', async () => {
     await inRolledBackTx(async (tx) => {
-      await expect(postTransaction(tx, 'test:zero', [0n, 0n])).rejects.toThrow(/ledger_entries_amount_non_zero/);
+      await expect(insertRawLedgerRows(tx, 'test:zero', [0n, 0n])).rejects.toThrow(/ledger_entries_amount_non_zero/);
     });
   });
 
   it('is append-only', async () => {
     await inRolledBackTx(async (tx) => {
-      const ledgerTx = await postTransaction(tx, 'test:append-only', [100n, -100n]);
+      const ledgerTx = await insertRawLedgerRows(tx, 'test:append-only', [100n, -100n]);
       await expect(
         tx.ledgerEntry.updateMany({ where: { transactionId: ledgerTx.id }, data: { amount: 1n } }),
       ).rejects.toThrow(/append-only/);
@@ -71,7 +71,7 @@ describe('ledger', () => {
 
   it('rejects a second posting with the same idempotency key', async () => {
     await inRolledBackTx(async (tx) => {
-      await postTransaction(tx, 'test:idempotent', [100n, -100n]);
+      await insertRawLedgerRows(tx, 'test:idempotent', [100n, -100n]);
       await expect(
         tx.ledgerTransaction.create({ data: { kind: 'PAYMENT_CAPTURED', idempotencyKey: 'test:idempotent' } }),
       ).rejects.toThrow(/Unique constraint/);

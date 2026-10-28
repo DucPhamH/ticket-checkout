@@ -65,3 +65,11 @@ npm run format     Prettier (kèm sắp xếp class Tailwind)
 
 `.github/workflows/ci.yml` chạy ở mỗi lần push: kiểm tra format, lint, typecheck, test (trên một
 container Postgres), build production và `docker compose build`.
+
+## Database cho test
+
+`npm test` không bao giờ đụng tới database dev. Bước chuẩn bị chung của Vitest
+(`apps/api/test/setup/global-setup.ts`) xoá và tạo lại `tc_test` ngay cạnh nó, chạy mọi migration và
+seed, rồi cả bộ test chạy trên database đó. Nhờ vậy test được phép ghi sổ cái (vốn không xoá được),
+và lần chạy nào cũng bắt đầu từ cùng một trạng thái. Để an toàn, bước chuẩn bị từ chối tạo lại bất kỳ
+database nào có tên không kết thúc bằng `_test`. CI dùng đúng cơ chế này trên Postgres của nó.

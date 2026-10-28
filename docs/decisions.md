@@ -94,3 +94,7 @@ would move to a dedicated worker or a database-scheduled job.
 **Fail fast on missing payment credentials.** The api refuses to start without valid VNPay
 credentials, so a misconfiguration shows up at deploy time rather than at the first payment. The
 check lives in the server entry point, so the seed, migrations and tests run without them.
+
+**Tests run against their own database, rebuilt every run.** Once tests post real ledger entries
+(append-only) through the api, cleaning up after them is impossible, so the suite recreates
+`tc_test` (migrations + seed) before it starts. The dev database is never touched.

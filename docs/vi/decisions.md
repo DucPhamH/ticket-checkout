@@ -93,3 +93,7 @@ mô lớn hơn thì chuyển sang một worker riêng hoặc job do database lê
 **Thiếu credential thanh toán thì dừng ngay.** Api không khởi động nếu thiếu credential VNPay hợp lệ,
 để lỗi cấu hình lộ ra ngay lúc deploy chứ không phải lúc có người thanh toán đầu tiên. Bước kiểm tra
 nằm ở điểm khởi động server, nên seed, migration và test vẫn chạy được mà không cần chúng.
+
+**Test chạy trên database riêng, dựng lại mỗi lần chạy.** Khi test bắt đầu ghi sổ cái thật (chỉ thêm,
+không xoá) qua api thì không thể dọn dẹp sau test được nữa, nên bộ test tạo lại `tc_test` (migration +
+seed) trước khi chạy. Database dev không bao giờ bị đụng tới.
