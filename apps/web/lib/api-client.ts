@@ -20,15 +20,20 @@ type RequestOptions = {
   body?: unknown;
   // Defaults to the session user; pass a number to act as someone else (e.g. a fallback).
   userId?: number;
+  headers?: Record<string, string>;
 };
 
 // Server-side fetch to the api. Always sends the current user and never caches.
-export async function apiRequest<T>(path: string, { method = 'GET', body, userId }: RequestOptions = {}): Promise<T> {
+export async function apiRequest<T>(
+  path: string,
+  { method = 'GET', body, userId, headers }: RequestOptions = {},
+): Promise<T> {
   const res = await fetch(`${API_INTERNAL_URL}${path}`, {
     method,
     cache: 'no-store',
     headers: {
       [USER_ID_HEADER]: String(userId ?? (await getSessionUserId())),
+      ...headers,
       ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
     },
     body: body === undefined ? undefined : JSON.stringify(body),

@@ -1,6 +1,6 @@
 import type { ZodOpenApiPathsObject } from 'zod-openapi';
 import { errorResponse, jsonResponse } from '../../openapi/common';
-import { CreateOrderBodySchema, OrderIdParamsSchema, OrderSchema } from './orders.schema';
+import { CreateOrderBodySchema, CreateOrderResponseSchema, OrderIdParamsSchema, OrderSchema } from './orders.schema';
 
 export const ordersPaths: ZodOpenApiPathsObject = {
   '/orders': {
@@ -8,12 +8,13 @@ export const ordersPaths: ZodOpenApiPathsObject = {
       tags: ['Orders'],
       summary: 'Create an order and reserve its tickets',
       description:
-        'Reserves the tickets for 15 minutes and creates a `PENDING` order. Amounts are computed by the api ' +
-        '(price + 10% service fee) and frozen on the order.',
+        'Reserves the tickets for 15 minutes, creates a `PENDING` order and its `PENDING` payment, and returns ' +
+        'the signed VNPay URL to send the buyer to. Amounts are computed by the api (price + 10% service fee) ' +
+        "and frozen on the order. Send the buyer's IP in `X-Forwarded-For`.",
       security: [{ userId: [] }],
       requestBody: { content: { 'application/json': { schema: CreateOrderBodySchema } } },
       responses: {
-        '201': jsonResponse('Order created, tickets reserved', OrderSchema),
+        '201': jsonResponse('Order created, tickets reserved, payment opened', CreateOrderResponseSchema),
         '400': errorResponse('Invalid body (`VALIDATION_ERROR`, `INVALID_JSON`)'),
         '401': errorResponse('No valid `X-User-Id`'),
         '403': errorResponse('Admins cannot buy (`ADMIN_CANNOT_BUY`)'),

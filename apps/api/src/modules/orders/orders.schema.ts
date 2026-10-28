@@ -1,10 +1,18 @@
 import { z } from 'zod';
-import { MAX_TICKETS_PER_ORDER, ORDER_STATUSES, type CreateOrderInput, type OrderDto } from '@tc/shared';
+import {
+  MAX_TICKETS_PER_ORDER,
+  ORDER_STATUSES,
+  SUPPORTED_LOCALES,
+  type CreateOrderInput,
+  type CreateOrderResponse,
+  type OrderDto,
+} from '@tc/shared';
 
 export const CreateOrderBodySchema = z
   .object({
     listingId: z.number().int().positive().meta({ example: 1 }),
     quantity: z.number().int().min(1).max(MAX_TICKETS_PER_ORDER).meta({ example: 2 }),
+    locale: z.enum(SUPPORTED_LOCALES).optional().meta({ description: 'Payment page language; default vi' }),
   })
   .meta({ id: 'CreateOrderInput' }) satisfies z.ZodType<CreateOrderInput>;
 
@@ -30,3 +38,10 @@ export const OrderSchema = z
     paidAt: isoDate.nullable(),
   })
   .meta({ id: 'Order' }) satisfies z.ZodType<OrderDto>;
+
+export const CreateOrderResponseSchema = z
+  .object({
+    order: OrderSchema,
+    paymentUrl: z.url().meta({ description: 'Signed VNPay URL to send the buyer to' }),
+  })
+  .meta({ id: 'CreateOrderResponse' }) satisfies z.ZodType<CreateOrderResponse>;

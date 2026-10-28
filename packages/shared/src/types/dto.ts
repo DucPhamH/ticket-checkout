@@ -65,7 +65,18 @@ export type LedgerLineDto = {
   eventId: number | null;
 };
 
+export const SUPPORTED_LOCALES = ['vi', 'en'] as const;
+export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
 export type CreateOrderInput = {
   listingId: number;
   quantity: number;
+  // Language of the payment page and of the page the buyer returns to. Defaults to "vi".
+  locale?: SupportedLocale;
+};
+
+export type CreateOrderResponse = {
+  order: OrderDto;
+  // Signed VNPay URL; the buyer's browser is sent here to pay.
+  paymentUrl: string;
 };

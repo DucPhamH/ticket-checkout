@@ -5,6 +5,7 @@ import type { User } from '../../generated/prisma/client';
 import { EventStatus, ListingStatus, UserRole } from '../../generated/prisma/enums';
 import { HttpError } from '../../lib/http-error';
 import { toNumber } from '../../lib/money';
+import { createPaymentForOrder } from '../payments/payments.service';
 import { expireStaleOrders } from './order-expiry';
 
 // What every order read needs for its DTO: event and seller via the listing.
@@ -18,7 +19,7 @@ export const orderInclude = {
 } as const;
 
 /**
- * Creates a PENDING order and reserves its tickets, all in one transaction.
+ * Creates a PENDING order with its PENDING payment and reserves the tickets, all in one transaction.
  *
  * The reservation is a single conditional UPDATE (`... WHERE quantity_available >= n`).
  * Postgres locks the listing row while updating it, so two buyers racing for the last
@@ -57,7 +58,7 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
     // Same function the checkout UI uses to show the total, so the buyer is charged what they saw.
     const amounts = calculateOrderAmounts(toNumber(listing.unitPrice), input.quantity);
 
-    return tx.order.create({
+    const order = await tx.order.create({
       data: {
         buyerId: buyer.id,
         listingId: listing.id,
@@ -71,6 +72,10 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
       },
       include: orderInclude,
     });
+
+    // Same transaction: an order never exists without its payment, and vice versa.
+    const payment = await createPaymentForOrder(tx, order);
+    return { order, payment };
   });
 }
 

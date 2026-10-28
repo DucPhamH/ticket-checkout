@@ -54,6 +54,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await prisma.payment.deleteMany({ where: { order: { listing: { eventId } } } });
   await prisma.order.deleteMany({ where: { listing: { eventId } } });
   await prisma.listing.deleteMany({ where: { eventId } });
   await prisma.event.deleteMany({ where: { id: eventId } });
@@ -125,6 +126,7 @@ describe('expiry on read and before reserving', () => {
     const res = await request(app).post('/orders').set('X-User-Id', String(buyerId)).send({ listingId, quantity: 1 });
 
     expect(res.status).toBe(201);
+    expect(res.body.order.status).toBe('PENDING');
     expect(await availableOf(listingId)).toBe(0);
   });
 });
@@ -189,5 +191,18 @@ describe('SKIP LOCKED', () => {
     await expireAllStaleOrders();
     expect(await statusOf(orderId)).toBe('EXPIRED');
     expect(await availableOf(listingId)).toBe(3);
+  });
+});
+
+describe('payments of expired orders', () => {
+  it('fail together with their order', async () => {
+    const listingId = await makeListing(2, 1);
+    const orderId = await makeOrder(listingId, 1, PAST());
+    await prisma.payment.create({ data: { orderId, txnRef: `expiry-test-${orderId}`, amount: 110_000n } });
+
+    await expireAllStaleOrders();
+
+    expect(await statusOf(orderId)).toBe('EXPIRED');
+    expect((await prisma.payment.findUniqueOrThrow({ where: { orderId } })).status).toBe('FAILED');
   });
 });

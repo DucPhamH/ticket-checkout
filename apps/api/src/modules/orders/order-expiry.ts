@@ -5,8 +5,8 @@ import { Prisma } from '../../generated/prisma/client';
 type Scope = { orderId?: number; listingId?: number };
 
 /**
- * Expires up to `limit` PENDING orders past their reservation and gives their tickets back,
- * in one SQL statement. Run it inside a transaction. Returns how many orders it expired.
+ * Expires up to `limit` PENDING orders past their reservation, fails their pending payments and
+ * gives their tickets back, in one SQL statement. Run it inside a transaction. Returns how many orders it expired.
  *
  * - Never releases tickets twice: only PENDING orders match, and they are locked while being
  *   expired, so a parallel or repeated run cannot pick them up again.
@@ -41,23 +41,31 @@ export async function expireStaleOrders(
       SET status = 'EXPIRED', updated_at = now()
       FROM batch
       WHERE orders.id = batch.id
-      RETURNING orders.listing_id, orders.quantity
+      RETURNING orders.id, orders.listing_id, orders.quantity
+    ),
+    failed_payments AS (
+      -- 3. Their payments can no longer succeed: mark them FAILED too.
+      UPDATE payments
+      SET status = 'FAILED', updated_at = now()
+      FROM expired
+      WHERE payments.order_id = expired.id AND payments.status = 'PENDING'
+      RETURNING payments.id
     ),
     released AS (
-      -- 3. Add the tickets up per listing (several expired orders can share one listing).
+      -- 4. Add the tickets up per listing (several expired orders can share one listing).
       SELECT listing_id, SUM(quantity)::int AS tickets
       FROM expired
       GROUP BY listing_id
     ),
     restocked AS (
-      -- 4. Put those tickets back on sale, every listing in one go.
+      -- 5. Put those tickets back on sale, every listing in one go.
       UPDATE listings
       SET quantity_available = listings.quantity_available + released.tickets, updated_at = now()
       FROM released
       WHERE listings.id = released.listing_id
       RETURNING listings.id
     )
-    -- 5. Report how many orders expired. (Every step above runs exactly once, used here or not.)
+    -- 6. Report how many orders expired. (Every step above runs exactly once, used here or not.)
     SELECT COUNT(*)::int AS expired FROM expired
   `;
   return result.expired;
