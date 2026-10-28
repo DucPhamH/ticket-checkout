@@ -82,8 +82,8 @@ cho nút tăng số lượng trên giao diện và phần kiểm tra ở api.
 
 **Đơn của người khác trả 404 chứ không phải 403**, để không dò được mã đơn.
 
-**Các file test api chạy lần lượt** trên database dev dùng chung; mỗi file tự tạo và tự xoá dữ liệu
-tạm có gắn nhãn.
+**Các file test api chạy lần lượt** trên database test (xem bên dưới); mỗi file tự tạo dữ liệu có gắn
+nhãn, để dữ liệu của file này không lẫn vào kết quả kiểm tra của file khác.
 
 **Đơn chưa thanh toán hết hạn ngay trong tiến trình api, không dùng worker hay cron riêng.** Lượt
 quét mỗi 60 giây trong api, cộng với hết hạn khi đọc đơn và trước khi giữ vé, đủ để vé luôn được mở

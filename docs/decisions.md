@@ -83,8 +83,8 @@ stepper and the api.
 
 **Someone else's order is a 404, not a 403**, so order ids cannot be probed.
 
-**API test files run one at a time** against the shared dev database, each creating and removing
-its own tagged fixtures.
+**API test files run one at a time** against the test database (see below), each creating its own
+tagged fixtures, so one file's data never shows up in another file's assertions.
 
 **Unpaid orders expire in-process, not with a separate worker or cron.** A 60-second sweep inside
 the api plus expiry on read and before reserving keeps tickets available without extra
