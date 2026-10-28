@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pageQuerySchema, pageSchema } from '../../lib/pagination';
 import {
   MAX_TICKETS_PER_ORDER,
   ORDER_STATUSES,
@@ -6,6 +7,7 @@ import {
   type CreateOrderInput,
   type CreateOrderResponse,
   type OrderDto,
+  type Page,
 } from '@tc/shared';
 
 export const CreateOrderBodySchema = z
@@ -45,3 +47,11 @@ export const CreateOrderResponseSchema = z
     paymentUrl: z.url().meta({ description: 'Signed VNPay URL to send the buyer to' }),
   })
   .meta({ id: 'CreateOrderResponse' }) satisfies z.ZodType<CreateOrderResponse>;
+
+// The sort key of the last order on a page.
+const OrderCursorSchema = z.object({ createdAt: z.iso.datetime().pipe(z.coerce.date()), id: z.number().int() });
+export type OrderCursor = z.output<typeof OrderCursorSchema>;
+
+export const MyOrdersQuerySchema = pageQuerySchema(OrderCursorSchema);
+
+export const OrderPageSchema = pageSchema(OrderSchema).meta({ id: 'OrderPage' }) satisfies z.ZodType<Page<OrderDto>>;

@@ -2,7 +2,7 @@ import { ORDER_EXPIRY_BATCH_SIZE } from '../../constants/orders';
 import { prisma } from '../../db/prisma';
 import { Prisma } from '../../generated/prisma/client';
 
-type Scope = { orderId?: number; listingId?: number };
+type Scope = { orderId?: number; listingId?: number; buyerId?: number };
 
 /**
  * Expires up to `limit` PENDING orders past their reservation, fails their pending payments and
@@ -20,9 +20,10 @@ export async function expireStaleOrders(
   scope: Scope = {},
   limit: number = ORDER_EXPIRY_BATCH_SIZE,
 ): Promise<number> {
-  // Optional narrowing: one order (on read) or one listing (before a reservation).
+  // Optional narrowing: one order or one buyer's orders (on read), or one listing (before a reservation).
   const onlyOrder = scope.orderId === undefined ? Prisma.empty : Prisma.sql`AND id = ${scope.orderId}`;
   const onlyListing = scope.listingId === undefined ? Prisma.empty : Prisma.sql`AND listing_id = ${scope.listingId}`;
+  const onlyBuyer = scope.buyerId === undefined ? Prisma.empty : Prisma.sql`AND buyer_id = ${scope.buyerId}`;
 
   const [result] = await tx.$queryRaw<[{ expired: number }]>`
     WITH batch AS (
@@ -30,7 +31,7 @@ export async function expireStaleOrders(
       --    another transaction already holds.
       SELECT id
       FROM orders
-      WHERE status = 'PENDING' AND expires_at < now() ${onlyOrder} ${onlyListing}
+      WHERE status = 'PENDING' AND expires_at < now() ${onlyOrder} ${onlyListing} ${onlyBuyer}
       ORDER BY expires_at, id
       LIMIT ${limit}
       FOR UPDATE SKIP LOCKED

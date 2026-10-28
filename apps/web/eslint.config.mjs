@@ -8,7 +8,7 @@ const features = readdirSync(new URL('./features', import.meta.url), { withFileT
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name);
 
-const SHARED = ['./components', './lib', './constants', './i18n'];
+const SHARED = ['./components', './hooks', './lib', './constants', './i18n'];
 
 export default defineConfig([
   ...nextVitals,

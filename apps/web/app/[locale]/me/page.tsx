@@ -14,7 +14,7 @@ export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) 
   const [t, balances, orders, ledger] = await Promise.all([
     getTranslations('wallet'),
     getBalances(user.id),
-    listMyOrders(user.id),
+    listMyOrders(),
     listMyLedger(user.id),
   ]);
 
@@ -30,7 +30,8 @@ export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) 
           <CardHeader className="pb-2">
             <CardTitle>{t('myOrders')}</CardTitle>
           </CardHeader>
-          <OrderList orders={orders} locale={locale} />
+          {/* Keyed by user so switching user drops pages loaded for the previous one. */}
+          <OrderList key={user.id} page={orders} locale={locale} />
         </Card>
         <Card>
           <CardHeader className="pb-2">

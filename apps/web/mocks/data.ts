@@ -1,31 +1,5 @@
 // Design-phase fixtures. Deleted once services call the real api (step 4).
-import type { LedgerLineDto, OrderDto } from '@tc/shared';
-
-const ORDER_BASE = {
-  event: {
-    id: 1,
-    name: 'Hà Nội Indie Night 2026',
-    venue: 'Cung Điền kinh Mỹ Đình',
-    startsAt: '2026-12-12T12:30:00.000Z',
-  },
-  seller: { id: 1, name: 'Alice Nguyen' },
-  quantity: 2,
-  unitPrice: 450_000,
-  subtotal: 900_000,
-  buyerFee: 90_000,
-  total: 990_000,
-  createdAt: '2026-10-27T03:00:00.000Z',
-  expiresAt: '2026-10-27T03:15:00.000Z',
-};
-
-// Order ids map to statuses so every result screen can be previewed.
-export const MOCK_ORDERS: OrderDto[] = [
-  { ...ORDER_BASE, id: 101, status: 'PAID', paidAt: '2026-10-27T03:02:00.000Z' },
-  { ...ORDER_BASE, id: 102, status: 'PENDING', paidAt: null },
-  { ...ORDER_BASE, id: 103, status: 'FAILED', paidAt: null },
-  { ...ORDER_BASE, id: 104, status: 'EXPIRED', paidAt: null },
-  { ...ORDER_BASE, id: 105, status: 'REFUNDED', paidAt: '2026-10-25T03:02:00.000Z' },
-];
+import type { LedgerLineDto } from '@tc/shared';
 
 export const MOCK_LEDGER: LedgerLineDto[] = [
   {

@@ -1,6 +1,13 @@
 import type { ZodOpenApiPathsObject } from 'zod-openapi';
 import { errorResponse, jsonResponse } from '../../openapi/common';
-import { CreateOrderBodySchema, CreateOrderResponseSchema, OrderIdParamsSchema, OrderSchema } from './orders.schema';
+import {
+  CreateOrderBodySchema,
+  CreateOrderResponseSchema,
+  MyOrdersQuerySchema,
+  OrderIdParamsSchema,
+  OrderPageSchema,
+  OrderSchema,
+} from './orders.schema';
 
 export const ordersPaths: ZodOpenApiPathsObject = {
   '/orders': {
@@ -35,6 +42,22 @@ export const ordersPaths: ZodOpenApiPathsObject = {
         '400': errorResponse('`id` is not a positive integer'),
         '401': errorResponse('No valid `X-User-Id`'),
         '404': errorResponse('No such order for this user (`ORDER_NOT_FOUND`)'),
+      },
+    },
+  },
+  '/me/orders': {
+    get: {
+      tags: ['Orders'],
+      summary: 'My orders',
+      description:
+        'The current user’s orders, newest first, cursor-paginated. Reservations past their deadline are ' +
+        'expired before listing.',
+      security: [{ userId: [] }],
+      requestParams: { query: MyOrdersQuerySchema },
+      responses: {
+        '200': jsonResponse('One page of orders', OrderPageSchema),
+        '400': errorResponse('Bad `limit` or `cursor` (`VALIDATION_ERROR`)'),
+        '401': errorResponse('No valid `X-User-Id`'),
       },
     },
   },

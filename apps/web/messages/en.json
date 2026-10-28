@@ -1,4 +1,8 @@
 {
+  "common": {
+    "loadMore": "Load more",
+    "loadMoreFailed": "Could not load more. Please try again."
+  },
   "meta": {
     "title": "ReTix – Event ticket resale",
     "description": "Buy event tickets from resellers. Your money is held safely until the event takes place."

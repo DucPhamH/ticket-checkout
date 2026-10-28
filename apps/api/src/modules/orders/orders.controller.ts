@@ -1,13 +1,13 @@
 import type { RequestHandler } from 'express';
-import type { CreateOrderResponse } from '@tc/shared';
+import type { CreateOrderResponse, OrderDto, Page } from '@tc/shared';
 import { HttpError } from '../../lib/http-error';
 import { clientIp } from '../../lib/client-ip';
 import { requireCurrentUser } from '../../middlewares/current-user';
 import { reconcileIfDue } from '../payments/payments.reconcile';
 import { paymentUrlFor } from '../payments/payments.service';
 import { toOrderDto } from './orders.mapper';
-import { CreateOrderBodySchema, OrderIdParamsSchema } from './orders.schema';
-import { createOrder, findOrderForBuyer } from './orders.service';
+import { CreateOrderBodySchema, MyOrdersQuerySchema, OrderIdParamsSchema } from './orders.schema';
+import { createOrder, findOrderForBuyer, listOrdersForBuyer } from './orders.service';
 
 export const postOrder: RequestHandler = async (req, res) => {
   const input = CreateOrderBodySchema.parse(req.body);
@@ -27,4 +27,9 @@ export const getOrder: RequestHandler = async (req, res) => {
     order = (await findOrderForBuyer(id, buyerId)) ?? order;
   }
   res.json(toOrderDto(order));
+};
+
+export const getMyOrders: RequestHandler = async (req, res) => {
+  const page = MyOrdersQuerySchema.parse(req.query);
+  res.json((await listOrdersForBuyer(requireCurrentUser(req).id, page)) satisfies Page<OrderDto>);
 };

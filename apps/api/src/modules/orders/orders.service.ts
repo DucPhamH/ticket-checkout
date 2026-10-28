@@ -5,8 +5,11 @@ import type { User } from '../../generated/prisma/client';
 import { EventStatus, ListingStatus, UserRole } from '../../generated/prisma/enums';
 import { HttpError } from '../../lib/http-error';
 import { toNumber } from '../../lib/money';
+import { toPage } from '../../lib/pagination';
 import { createPaymentForOrder } from '../payments/payments.service';
 import { expireStaleOrders } from './order-expiry';
+import { toOrderDto } from './orders.mapper';
+import type { OrderCursor } from './orders.schema';
 
 // What every order read needs for its DTO: event and seller via the listing.
 export const orderInclude = {
@@ -90,3 +93,27 @@ export function findOrderForBuyer(orderId: number, buyerId: number) {
 }
 
 export type OrderWithDetails = NonNullable<Awaited<ReturnType<typeof findOrderForBuyer>>>;
+
+/**
+ * One page of a buyer's orders, newest first. Keyset pagination on (created_at, id), which the
+ * (buyer_id, created_at DESC) index serves; id breaks ties between orders created in the same ms.
+ * Stale reservations are expired first, so the list never shows a dead order as PENDING.
+ */
+export async function listOrdersForBuyer(buyerId: number, page: { limit: number; cursor?: OrderCursor }) {
+  const { limit, cursor } = page;
+  const rows = await prisma.$transaction(async (tx) => {
+    await expireStaleOrders(tx, { buyerId });
+    return tx.order.findMany({
+      where: {
+        buyerId,
+        ...(cursor && {
+          OR: [{ createdAt: { lt: cursor.createdAt } }, { createdAt: cursor.createdAt, id: { lt: cursor.id } }],
+        }),
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: limit + 1,
+      include: orderInclude,
+    });
+  });
+  return toPage(rows, limit, toOrderDto, (order) => ({ createdAt: order.createdAt.toISOString(), id: order.id }));
+}

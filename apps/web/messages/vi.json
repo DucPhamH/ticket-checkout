@@ -1,4 +1,8 @@
 {
+  "common": {
+    "loadMore": "Xem thêm",
+    "loadMoreFailed": "Không tải được, hãy thử lại."
+  },
   "meta": {
     "title": "ReTix – Mua bán lại vé sự kiện",
     "description": "Mua vé sự kiện từ người bán lại, tiền được giữ an toàn đến khi sự kiện diễn ra."
