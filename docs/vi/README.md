@@ -14,6 +14,7 @@ Nếu mới làm quen với codebase, nên đọc theo thứ tự:
 8. [Các quyết định](decisions.md) – những chỗ đề bài bỏ ngỏ và lý do chọn
 9. [Hướng dẫn đọc database](08-database-guide.md) – sơ đồ, giải thích từng bảng, một lần mua vé đi qua các bảng, câu hỏi tự kiểm tra
 10. [Khái niệm database](09-database-concepts.md) – ràng buộc, index, transaction, khoá dòng, trigger, PL/pgSQL, view, migration; giải thích từng dòng SQL viết tay
+11. [Luồng thanh toán từ đầu đến cuối](10-payment-flow.md) – bấm thanh toán → ghi bảng nào → gọi VNPay thế nào → IPN → Return, kèm dữ liệu thật của một đơn
 
 Vận hành: [Chạy app và xem log](running.md).
 

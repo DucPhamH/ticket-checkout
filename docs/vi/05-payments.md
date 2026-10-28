@@ -2,6 +2,8 @@
 
 [English](../05-payments.md)
 
+Muốn xem từng bước kèm dữ liệu thật (bảng nào bị ghi, gửi gì cho VNPay): [Luồng thanh toán từ đầu đến cuối](10-payment-flow.md).
+
 > Trạng thái: đã làm xong và đã kiểm chứng trọn vẹn với VNPay sandbox, kể cả IPN thật gửi qua đường
 > hầm.
 
