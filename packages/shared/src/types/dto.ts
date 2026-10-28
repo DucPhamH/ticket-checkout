@@ -1,4 +1,11 @@
-import type { EventStatus, LedgerTransactionKind, ListingStatus, OrderStatus, UserRole } from '../constants/status';
+import type {
+  EventStatus,
+  LedgerTransactionKind,
+  ListingStatus,
+  OrderStatus,
+  RefundStatus,
+  UserRole,
+} from '../constants/status';
 
 // Shapes returned by the api. Money is in VND (integer); dates are ISO strings.
 
@@ -128,4 +135,20 @@ export type MyListingDto = {
   ticketsSold: number; // in paid orders
   createdAt: string;
   withdrawnAt: string | null;
+};
+
+// A refund as the admin sees it. PENDING: not sent yet; FAILED: VNPay refused or was unreachable,
+// can be retried; SUCCEEDED: the buyer has their money back.
+export type RefundDto = {
+  id: number;
+  orderId: number;
+  buyer: { id: number; name: string };
+  event: { id: number; name: string };
+  amount: number;
+  status: RefundStatus;
+  reason: string; // LATE_PAYMENT, EVENT_ENDED, EVENT_CANCELLED
+  attempts: number;
+  lastError: string | null;
+  createdAt: string;
+  completedAt: string | null;
 };

@@ -18,3 +18,6 @@ export const LEDGER_TRANSACTION_KINDS = [
   'REFUND_COMPLETED',
 ] as const;
 export type LedgerTransactionKind = (typeof LEDGER_TRANSACTION_KINDS)[number];
+
+export const REFUND_STATUSES = ['PENDING', 'SUCCEEDED', 'FAILED'] as const;
+export type RefundStatus = (typeof REFUND_STATUSES)[number];

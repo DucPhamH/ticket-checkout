@@ -1,7 +1,7 @@
 import { prisma } from '../../db/prisma';
 import { Prisma } from '../../generated/prisma/client';
 import { toPage } from '../../lib/pagination';
-import { toAdminEventDto } from './admin.mapper';
+import { toAdminEventDto, toRefundDto } from './admin.mapper';
 import type { AdminEventCursor } from './admin.schema';
 
 export type EventSales = { paidOrders: number; ticketsSold: number; paidTotal: bigint };
@@ -42,4 +42,30 @@ export async function listEventsForAdmin(page: { limit: number; cursor?: AdminEv
     (event) => toAdminEventDto(event, sales.get(event.id) ?? NO_SALES),
     (event) => ({ startsAt: event.startsAt.toISOString(), id: event.id }),
   );
+}
+
+export const refundInclude = {
+  order: {
+    select: {
+      buyer: { select: { id: true, name: true } },
+      listing: { select: { event: { select: { id: true, name: true } } } },
+    },
+  },
+} as const;
+
+export type RefundWithDetails = Prisma.RefundGetPayload<{ include: typeof refundInclude }>;
+
+/** One page of refunds, newest first (keyset on id). */
+export async function listRefunds(page: { limit: number; afterId?: number }) {
+  const refunds = await prisma.refund.findMany({
+    where: page.afterId === undefined ? {} : { id: { lt: page.afterId } },
+    orderBy: { id: 'desc' },
+    take: page.limit + 1,
+    include: refundInclude,
+  });
+  return toPage(refunds, page.limit, toRefundDto, (refund) => ({ id: refund.id }));
+}
+
+export function findRefund(id: number) {
+  return prisma.refund.findUniqueOrThrow({ where: { id }, include: refundInclude });
 }

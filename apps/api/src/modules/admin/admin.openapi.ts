@@ -5,6 +5,10 @@ import {
   AdminEventPageSchema,
   AdminEventsQuerySchema,
   CompleteEventResultSchema,
+  RefundIdParamsSchema,
+  RefundPageSchema,
+  RefundSchema,
+  RefundsQuerySchema,
   TrialBalanceSchema,
 } from './admin.schema';
 
@@ -55,6 +59,38 @@ export const adminPaths: ZodOpenApiPathsObject = {
         ...adminErrors,
         '404': errorResponse('No such event (`EVENT_NOT_FOUND`)'),
         '409': errorResponse('The event was cancelled (`EVENT_CANCELLED`)'),
+      },
+    },
+  },
+  '/admin/refunds': {
+    get: {
+      tags: ['Admin'],
+      summary: 'Refunds',
+      description: 'Every refund owed or made, newest first, cursor-paginated.',
+      security: [{ userId: [] }],
+      requestParams: { query: RefundsQuerySchema },
+      responses: {
+        '200': jsonResponse('One page of refunds', RefundPageSchema),
+        '400': errorResponse('Bad `limit` or `cursor` (`VALIDATION_ERROR`)'),
+        ...adminErrors,
+      },
+    },
+  },
+  '/admin/refunds/{id}/retry': {
+    post: {
+      tags: ['Admin'],
+      summary: 'Send a refund to VNPay (again)',
+      description:
+        'Calls VNPay’s refund API for a pending or failed refund. On success the order becomes `REFUNDED` and ' +
+        '`REFUND_COMPLETED` is posted. A refund that already succeeded is never sent twice. Check `status` and ' +
+        '`lastError` in the answer.',
+      security: [{ userId: [] }],
+      requestParams: { path: RefundIdParamsSchema },
+      responses: {
+        '200': jsonResponse('The refund after this attempt', RefundSchema),
+        '400': errorResponse('`id` is not a positive integer'),
+        ...adminErrors,
+        '404': errorResponse('No such refund (`REFUND_NOT_FOUND`)'),
       },
     },
   },

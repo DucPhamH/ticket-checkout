@@ -2,9 +2,11 @@ import { z } from 'zod';
 import {
   ACCOUNT_TYPES,
   EVENT_STATUSES,
+  REFUND_STATUSES,
   type AdminEventDto,
   type CompleteEventResultDto,
   type Page,
+  type RefundDto,
   type TrialBalanceDto,
 } from '@tc/shared';
 import { pageQuerySchema, pageSchema } from '../../lib/pagination';
@@ -61,3 +63,29 @@ export const CompleteEventResultSchema = z
     platformRevenue: z.number().int().meta({ description: 'Fees earned by this request', example: 237500 }),
   })
   .meta({ id: 'CompleteEventResult' }) satisfies z.ZodType<CompleteEventResultDto>;
+
+export const RefundIdParamsSchema = z.object({
+  id: z.coerce.number().int().positive().meta({ description: 'Refund id', example: 1 }),
+});
+
+export const RefundSchema = z
+  .object({
+    id: z.number().int(),
+    orderId: z.number().int(),
+    buyer: z.object({ id: z.number().int(), name: z.string() }),
+    event: z.object({ id: z.number().int(), name: z.string() }),
+    amount: z.number().int().meta({ description: 'VND, the full order total', example: 715000 }),
+    status: z.enum(REFUND_STATUSES),
+    reason: z.string().meta({ example: 'EVENT_CANCELLED' }),
+    attempts: z.number().int(),
+    lastError: z.string().nullable(),
+    createdAt: isoDate,
+    completedAt: isoDate.nullable(),
+  })
+  .meta({ id: 'Refund' }) satisfies z.ZodType<RefundDto>;
+
+export const RefundsQuerySchema = pageQuerySchema(z.object({ id: z.number().int() }));
+
+export const RefundPageSchema = pageSchema(RefundSchema).meta({ id: 'RefundPage' }) satisfies z.ZodType<
+  Page<RefundDto>
+>;

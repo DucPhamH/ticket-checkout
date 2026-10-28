@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { signQueryDrResponse } from '../../src/modules/payments/vnpay/vnpay.querydr';
+import { signRefundResponse } from '../../src/modules/payments/vnpay/vnpay.refund';
 
 export const TEST_SECRET = 'TEST_SECRET_FOR_UNIT_TESTS_ONLY';
 
@@ -20,4 +21,28 @@ export function mockVnpayQuery(fields: Record<string, string>, secret = TEST_SEC
   };
   const signed = { ...body, vnp_SecureHash: signQueryDrResponse(body, secret) };
   return vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(signed), { status: 200 }));
+}
+
+// Makes every refund call get this answer from "VNPay", signed with the test secret.
+// `delayMs` keeps the call in flight for a while (to race two retries).
+export function mockVnpayRefund(fields: Record<string, string>, { secret = TEST_SECRET, delayMs = 0 } = {}) {
+  const body = {
+    vnp_ResponseId: 'resp-refund-1',
+    vnp_Command: 'refund',
+    vnp_ResponseCode: '00',
+    vnp_Message: 'Refund success',
+    vnp_TmnCode: 'TESTCODE',
+    vnp_BankCode: 'NCB',
+    vnp_PayDate: '20261028150000',
+    vnp_TransactionNo: '15717099',
+    vnp_TransactionType: '02',
+    vnp_TransactionStatus: '05',
+    vnp_OrderInfo: 'Hoan tien',
+    ...fields,
+  };
+  const signed = { ...body, vnp_SecureHash: signRefundResponse(body, secret) };
+  return vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+    if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return new Response(JSON.stringify(signed), { status: 200 });
+  });
 }

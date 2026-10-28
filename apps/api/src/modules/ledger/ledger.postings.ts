@@ -68,3 +68,23 @@ export function eventSettledPosting(order: OrderAmounts, sellerId: number, event
     ],
   };
 }
+
+/**
+ * VNPay refunded the buyer: the money we owed them leaves the gateway. Closes what LATE_PAYMENT or
+ * ORDER_CANCELLED put in their refund_payable account.
+ */
+export function refundCompletedPosting(
+  refund: { id: number; orderId: number; amount: bigint },
+  buyerId: number,
+): PostingInput {
+  return {
+    kind: LedgerTransactionKind.REFUND_COMPLETED,
+    idempotencyKey: `refund:${refund.id}`,
+    orderId: refund.orderId,
+    refundId: refund.id,
+    lines: [
+      debit(ACCOUNTS.buyerRefundPayable(buyerId), refund.amount),
+      credit(ACCOUNTS.gatewayClearing, refund.amount),
+    ],
+  };
+}
