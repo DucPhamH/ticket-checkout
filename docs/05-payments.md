@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/05-payments.md)
 
-> Status: signing and payment creation are built; the buyer is sent to the sandbox. The return URL
-> and IPN come next.
+> Status: signing, payment creation and the return URL are built and tested against the sandbox with
+> the NCB test card. IPN comes next.
 
 ## Why VNPay
 
@@ -98,3 +98,19 @@ the logic stays readable.
 - `vnp_IpAddr` is the buyer's address forwarded by web in `X-Forwarded-For` (the api only sees
   web's address otherwise); IPv6 localhost is mapped to `127.0.0.1` to fit VNPay's 7–45 characters.
 - When an order expires, its `PENDING` payment becomes `FAILED` in the same statement.
+
+## Return URL (built)
+
+`GET /payments/vnpay/return/:locale` (`modules/payments/payments.return.ts`):
+
+1. Verifies `vnp_SecureHash`.
+2. Finds the payment by `vnp_TxnRef`.
+3. Stores every parameter as received in `payment_notifications` (`source = RETURN`) with
+   `signature_valid` and a conclusion: `REPORTED_SUCCESS` (`vnp_ResponseCode` and
+   `vnp_TransactionStatus` both `00`), `REPORTED_FAILURE`, `INVALID_SIGNATURE` or `UNKNOWN_PAYMENT`.
+4. Redirects to `/<locale>/orders/<id>` (home for an unknown reference). The target is built only
+   from config and database ids, never from the query, so it cannot be used as an open redirect.
+
+It never changes the order or the payment. Tested with the sandbox and the NCB test card: VNPay's
+own signature on the return verified, the result was `REPORTED_SUCCESS`, and the order stayed
+`PENDING` until IPN. That order then expired, which is exactly the gap IPN and `querydr` close.

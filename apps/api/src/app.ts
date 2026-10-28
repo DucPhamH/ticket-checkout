@@ -5,6 +5,7 @@ import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
 import { eventsRouter } from './modules/events/events.router';
 import { ordersRouter } from './modules/orders/orders.router';
+import { paymentsRouter } from './modules/payments/payments.router';
 import { usersRouter } from './modules/users/users.router';
 import { openApiRouter } from './openapi/openapi.router';
 
@@ -19,6 +20,7 @@ export function createApp() {
   app.use(usersRouter);
   app.use(eventsRouter);
   app.use(ordersRouter);
+  app.use(paymentsRouter);
   app.use(openApiRouter);
 
   app.use(notFound);

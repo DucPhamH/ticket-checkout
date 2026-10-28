@@ -2,8 +2,8 @@
 
 [English](../05-payments.md)
 
-> Trạng thái: phần ký và tạo payment đã làm; người mua được chuyển sang sandbox. Return URL và IPN
-> làm tiếp theo.
+> Trạng thái: phần ký, tạo payment và return URL đã làm, đã thử với sandbox bằng thẻ test NCB. IPN làm
+> tiếp theo.
 
 ## Vì sao chọn VNPay
 
@@ -98,3 +98,20 @@ web chuyển trình duyệt sang `paymentUrl`.
   thấy địa chỉ của web); localhost IPv6 được đổi thành `127.0.0.1` cho vừa giới hạn 7–45 ký tự của
   VNPay.
 - Khi đơn hết hạn, payment `PENDING` của nó chuyển `FAILED` ngay trong cùng câu lệnh.
+
+## Return URL (đã làm)
+
+`GET /payments/vnpay/return/:locale` (`modules/payments/payments.return.ts`):
+
+1. Kiểm tra `vnp_SecureHash`.
+2. Tìm payment theo `vnp_TxnRef`.
+3. Lưu nguyên văn mọi tham số vào `payment_notifications` (`source = RETURN`) kèm `signature_valid` và
+   kết luận: `REPORTED_SUCCESS` (`vnp_ResponseCode` và `vnp_TransactionStatus` đều `00`),
+   `REPORTED_FAILURE`, `INVALID_SIGNATURE` hoặc `UNKNOWN_PAYMENT`.
+4. Chuyển về `/<locale>/orders/<mã đơn>` (về trang chủ nếu mã tham chiếu lạ). Địa chỉ chuyển hướng chỉ
+   được ghép từ cấu hình và mã lấy từ database, không bao giờ từ query, nên không bị lợi dụng để chuyển
+   người dùng sang trang khác (open redirect).
+
+Endpoint này không bao giờ đổi trạng thái đơn hay payment. Đã thử với sandbox và thẻ test NCB: chữ ký
+VNPay gửi về được xác thực đúng, kết luận `REPORTED_SUCCESS`, và đơn vẫn `PENDING` cho tới khi có IPN.
+Đơn đó sau đó hết hạn, đúng lỗ hổng mà IPN và `querydr` sẽ lấp.
