@@ -43,12 +43,20 @@ Each Dockerfile builds from the repo root (`context: .`) so it can see `packages
    workspaces, so the other app's manifest is needed even though its code is not.
 2. `npm ci --workspace @tc/api` installs only the api's dependency tree.
 3. Copy source, build shared, build the app.
+4. Copy only what runs into a fresh `node:22-alpine` (multi-stage):
+   - **api**: a `prod-deps` stage reinstalls with `--omit=dev --omit=optional --omit=peer`
+     (`optional` matters: the lockfile marks the prisma CLI as an optional peer of `@prisma/client`),
+     plus `dist/`. Migrations and the seed run in a separate one-off `migrate` service built from
+     the `build` stage, which has the prisma CLI; `api` starts only after it exits successfully.
+   - **web**: Next's `output: 'standalone'` traces the files the server needs (from the monorepo
+     root, so `@tc/shared` is included); the image holds that tree plus `.next/static`.
 
 Copying manifests before source keeps the install layer cached when only code changes.
 `.dockerignore` excludes host `node_modules`: the image is Alpine (musl), the host is not.
 
-Known gap: images are single-stage and keep build tooling (api ~500 MB, web ~1.3 GB). A
-multi-stage build with Next's `output: 'standalone'` would bring both to roughly 200 MB.
+Sizes on disk: api 1.26 GB → 391 MB (111 MB of it `node_modules`), web 1.72 GB → 335 MB. The
+`migrate` image stays large (~1.3 GB) but only runs once, before the api. Both runtime images run as
+the unprivileged `node` user. Host ports can be moved with `WEB_PORT`, `API_PORT`, `DB_PORT`.
 
 ## Scripts
 

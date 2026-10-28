@@ -43,13 +43,20 @@ Mỗi Dockerfile build từ gốc repo (`context: .`) để nhìn thấy `packag
    nên vẫn cần file khai báo của app kia dù không cần code của nó.
 2. `npm ci --workspace @tc/api` chỉ cài cây thư viện của api.
 3. Copy code, build shared, build app.
+4. Chỉ copy những gì cần để chạy sang một `node:22-alpine` mới (multi-stage):
+   - **api**: giai đoạn `prod-deps` cài lại với `--omit=dev --omit=optional --omit=peer`
+     (`optional` là cần thiết: lockfile đánh dấu prisma CLI là peer tuỳ chọn của `@prisma/client`),
+     cộng thêm `dist/`. Migration và seed chạy trong service `migrate` riêng, chạy một lần rồi
+     thoát, build từ giai đoạn `build` (có prisma CLI); `api` chỉ khởi động khi `migrate` xong.
+   - **web**: `output: 'standalone'` của Next lần theo các file server cần (tính từ gốc monorepo
+     nên có cả `@tc/shared`); image chỉ gồm cây đó và `.next/static`.
 
 Copy file khai báo trước code giúp Docker dùng lại lớp đã cài thư viện khi chỉ có code thay đổi.
 `.dockerignore` loại `node_modules` của máy dev: image chạy Alpine (musl), máy dev thì không.
 
-Hạn chế đã biết: image hiện build một giai đoạn và còn giữ công cụ build (api ~500 MB, web
-~1,3 GB). Build nhiều giai đoạn (multi-stage) kết hợp `output: 'standalone'` của Next sẽ đưa cả
-hai xuống khoảng 200 MB.
+Dung lượng trên đĩa: api 1,26 GB → 391 MB (trong đó `node_modules` 111 MB), web 1,72 GB → 335 MB.
+Image `migrate` vẫn lớn (~1,3 GB) nhưng chỉ chạy một lần trước api. Cả hai image chạy thật đều dùng
+user không đặc quyền `node`. Có thể đổi cổng trên máy bằng `WEB_PORT`, `API_PORT`, `DB_PORT`.
 
 ## Lệnh
 

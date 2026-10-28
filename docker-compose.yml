@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: tc
       POSTGRES_DB: tc
     ports:
-      - '5432:5432'
+      - '${DB_PORT:-5432}:5432'
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +14,18 @@ services:
       interval: 2s
       timeout: 3s
       retries: 20
+
+  # One-off job: applies pending migrations and seeds the demo data (idempotent), then exits.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://tc:tc@db:5432/tc
+    depends_on:
+      db:
+        condition: service_healthy
 
   api:
     build:
@@ -31,10 +43,10 @@ services:
       VNP_PAY_URL: ${VNP_PAY_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
       VNP_API_URL: ${VNP_API_URL:-https://sandbox.vnpayment.vn/merchant_webapi/api/transaction}
     ports:
-      - '4000:4000'
+      - '${API_PORT:-4000}:4000'
     depends_on:
-      db:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
       test: ['CMD-SHELL', 'wget -qO- http://localhost:4000/health || exit 1']
       interval: 3s
@@ -48,7 +60,7 @@ services:
     environment:
       API_INTERNAL_URL: http://api:4000
     ports:
-      - '3000:3000'
+      - '${WEB_PORT:-3000}:3000'
     depends_on:
       api:
         condition: service_healthy

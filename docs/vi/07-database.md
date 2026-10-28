@@ -77,9 +77,9 @@ thật. Mỗi trường hợp chạy trong một transaction rồi rollback, dù
 
 ## Dữ liệu mẫu
 
-`prisma/seed.ts` tạo bốn người dùng (hai người bán, một người mua, một admin), hai sự kiện, năm
+`src/db/seed.ts` tạo bốn người dùng (hai người bán, một người mua, một admin), hai sự kiện, năm
 tin đăng và ba tài khoản sổ cái của sàn. Seed an toàn khi chạy lại (bỏ qua nếu đã có người dùng)
-và chạy mỗi lần container api khởi động, sau `prisma migrate deploy`. Seed không bao giờ tạo đơn
+và chạy trong container `migrate` (chạy một lần), sau `prisma migrate deploy`, trước khi api khởi động. Seed không bao giờ tạo đơn
 hay dòng sổ cái: những thứ đó chỉ sinh ra từ luồng thật.
 
 ## Lệnh (chạy trong `apps/api`, hoặc thêm `-w @tc/api` khi chạy từ gốc)

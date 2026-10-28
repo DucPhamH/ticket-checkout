@@ -1,9 +1,10 @@
 // Demo data: users, events, listings and the platform ledger accounts.
 // Idempotent: does nothing if users already exist, so it is safe on every container start.
+// Compiled with the app, so the Docker image runs it with plain node (dist/db/seed.js).
 // No orders or ledger entries are seeded; those only come from real flows.
-import { UserRole } from '../src/generated/prisma/enums';
-import { ACCOUNTS } from '../src/constants/ledger';
-import { prisma } from '../src/db/prisma';
+import { UserRole } from '../generated/prisma/enums';
+import { ACCOUNTS } from '../constants/ledger';
+import { prisma } from './prisma';
 
 // N days from today at a given Vietnam local time (UTC+7), e.g. 19:30 for an evening show.
 function daysFromNowAt(days: number, hour: number, minute: number): Date {

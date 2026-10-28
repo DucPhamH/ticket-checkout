@@ -74,9 +74,9 @@ database. Every case runs in a transaction that is rolled back, and uses
 
 ## Seed
 
-`prisma/seed.ts` creates four users (two sellers, one buyer, one admin), two events, five
+`src/db/seed.ts` creates four users (two sellers, one buyer, one admin), two events, five
 listings and the three platform ledger accounts. It is idempotent (skips if users exist) and
-runs on every api container start after `prisma migrate deploy`. It never creates orders or
+runs in the one-off `migrate` container after `prisma migrate deploy`, before the api starts. It never creates orders or
 ledger entries: those only come from real flows.
 
 ## Commands (from `apps/api`, or with `-w @tc/api` from the root)
