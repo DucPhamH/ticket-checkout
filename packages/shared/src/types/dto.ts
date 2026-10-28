@@ -152,3 +152,11 @@ export type RefundDto = {
   createdAt: string;
   completedAt: string | null;
 };
+
+export type CancelEventResultDto = {
+  eventId: number;
+  cancelledAt: string;
+  cancelledOrders: number; // paid orders cancelled by this request; 0 if the event was already cancelled
+  refundsSucceeded: number;
+  refundsFailed: number; // still owed; retry them from the refunds list
+};

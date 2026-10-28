@@ -88,3 +88,26 @@ export function refundCompletedPosting(
     ],
   };
 }
+
+/**
+ * The event was cancelled: a paid order's money comes out of escrow (the seller's payout and our
+ * not-yet-earned fee) and is owed back to the buyer in full, until VNPay refunds it.
+ */
+export function orderCancelledPosting(
+  order: OrderAmounts,
+  parties: { sellerId: number; buyerId: number; eventId: number; refundId: number },
+): PostingInput {
+  const { sellerPayout, platformShare } = splitOrderTotal(order);
+  return {
+    kind: LedgerTransactionKind.ORDER_CANCELLED,
+    idempotencyKey: `cancel:order:${order.id}`,
+    orderId: order.id,
+    eventId: parties.eventId,
+    refundId: parties.refundId,
+    lines: [
+      debit(ACCOUNTS.sellerPending(parties.sellerId), sellerPayout),
+      debit(ACCOUNTS.feePending, platformShare),
+      credit(ACCOUNTS.buyerRefundPayable(parties.buyerId), order.total),
+    ],
+  };
+}

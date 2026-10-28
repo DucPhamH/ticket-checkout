@@ -1,6 +1,13 @@
-import type { AdminEventDto, CompleteEventResultDto, RefundDto, TrialBalanceDto } from '@tc/shared';
+import type {
+  AdminEventDto,
+  CancelEventResultDto,
+  CompleteEventResultDto,
+  RefundDto,
+  TrialBalanceDto,
+} from '@tc/shared';
 import type { Event } from '../../generated/prisma/client';
 import { toNumber } from '../../lib/money';
+import type { CancellationResult } from '../events/event-cancellation';
 import type { CompletionResult } from '../events/event-completion';
 import type { TrialBalance } from '../ledger/ledger.balances';
 import type { EventSales, RefundWithDetails } from './admin.service';
@@ -51,4 +58,8 @@ export function toRefundDto(refund: RefundWithDetails): RefundDto {
     createdAt: refund.createdAt.toISOString(),
     completedAt: refund.completedAt?.toISOString() ?? null,
   };
+}
+
+export function toCancelEventResultDto(result: CancellationResult): CancelEventResultDto {
+  return { ...result, cancelledAt: result.cancelledAt.toISOString() };
 }

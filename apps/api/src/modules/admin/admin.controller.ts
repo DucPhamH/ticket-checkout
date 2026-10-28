@@ -2,10 +2,11 @@ import type { RequestHandler } from 'express';
 import type { AdminEventDto, Page, RefundDto } from '@tc/shared';
 import { requireCurrentUser } from '../../middlewares/current-user';
 import { processRefund } from '../payments/payments.refund';
+import { cancelEvent } from '../events/event-cancellation';
 import { completeEvent } from '../events/event-completion';
 import { EventIdParamsSchema } from '../events/events.schema';
 import { getTrialBalance } from '../ledger/ledger.balances';
-import { toCompleteEventResultDto, toRefundDto, toTrialBalanceDto } from './admin.mapper';
+import { toCancelEventResultDto, toCompleteEventResultDto, toRefundDto, toTrialBalanceDto } from './admin.mapper';
 import { AdminEventsQuerySchema, RefundIdParamsSchema, RefundsQuerySchema } from './admin.schema';
 import { findRefund, listEventsForAdmin, listRefunds } from './admin.service';
 
@@ -33,4 +34,9 @@ export const postRetryRefund: RequestHandler = async (req, res) => {
   const { id } = RefundIdParamsSchema.parse(req.params);
   await processRefund(id, `admin-${requireCurrentUser(req).id}`);
   res.json(toRefundDto(await findRefund(id)));
+};
+
+export const postCancelEvent: RequestHandler = async (req, res) => {
+  const { id } = EventIdParamsSchema.parse(req.params);
+  res.json(toCancelEventResultDto(await cancelEvent(id, `admin-${requireCurrentUser(req).id}`)));
 };

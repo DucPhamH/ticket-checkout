@@ -4,6 +4,7 @@ import {
   EVENT_STATUSES,
   REFUND_STATUSES,
   type AdminEventDto,
+  type CancelEventResultDto,
   type CompleteEventResultDto,
   type Page,
   type RefundDto,
@@ -89,3 +90,13 @@ export const RefundsQuerySchema = pageQuerySchema(z.object({ id: z.number().int(
 export const RefundPageSchema = pageSchema(RefundSchema).meta({ id: 'RefundPage' }) satisfies z.ZodType<
   Page<RefundDto>
 >;
+
+export const CancelEventResultSchema = z
+  .object({
+    eventId: z.number().int(),
+    cancelledAt: isoDate,
+    cancelledOrders: z.number().int().meta({ description: 'Paid orders cancelled by this request', example: 2 }),
+    refundsSucceeded: z.number().int().meta({ example: 2 }),
+    refundsFailed: z.number().int().meta({ description: 'Still owed; retry from the refunds list', example: 0 }),
+  })
+  .meta({ id: 'CancelEventResult' }) satisfies z.ZodType<CancelEventResultDto>;

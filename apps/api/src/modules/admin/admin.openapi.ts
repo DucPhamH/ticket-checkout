@@ -4,6 +4,7 @@ import { EventIdParamsSchema } from '../events/events.schema';
 import {
   AdminEventPageSchema,
   AdminEventsQuerySchema,
+  CancelEventResultSchema,
   CompleteEventResultSchema,
   RefundIdParamsSchema,
   RefundPageSchema,
@@ -91,6 +92,25 @@ export const adminPaths: ZodOpenApiPathsObject = {
         '400': errorResponse('`id` is not a positive integer'),
         ...adminErrors,
         '404': errorResponse('No such refund (`REFUND_NOT_FOUND`)'),
+      },
+    },
+  },
+  '/admin/events/{id}/cancel': {
+    post: {
+      tags: ['Admin'],
+      summary: 'Cancel an event and refund its buyers',
+      description:
+        'Sets the event to `CANCELLED`. Every paid order becomes `REFUND_PENDING` and its money moves from escrow ' +
+        'to what we owe the buyer (`ORDER_CANCELLED`); then each refund is sent to VNPay. Failed refunds stay ' +
+        'listed for a retry. Idempotent. A completed event cannot be cancelled.',
+      security: [{ userId: [] }],
+      requestParams: { path: EventIdParamsSchema },
+      responses: {
+        '200': jsonResponse('What this request cancelled and refunded', CancelEventResultSchema),
+        '400': errorResponse('`id` is not a positive integer'),
+        ...adminErrors,
+        '404': errorResponse('No such event (`EVENT_NOT_FOUND`)'),
+        '409': errorResponse('The event already took place (`EVENT_COMPLETED`)'),
       },
     },
   },
