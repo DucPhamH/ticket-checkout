@@ -13,10 +13,13 @@ type ListingOptionProps = {
   selected: boolean;
   isOwn: boolean;
   onSelect: () => void;
+  // Roving tabindex: only one option in the group is reachable with Tab (see TicketPicker).
+  tabIndex: number;
+  ref: (element: HTMLButtonElement | null) => void;
 };
 
 // One selectable listing row; behaves like a radio button.
-export function ListingOption({ listing, selected, isOwn, onSelect }: ListingOptionProps) {
+export function ListingOption({ listing, selected, isOwn, onSelect, tabIndex, ref }: ListingOptionProps) {
   const t = useTranslations('event');
   const disabled = isOwn || listing.quantityAvailable === 0;
 
@@ -25,6 +28,8 @@ export function ListingOption({ listing, selected, isOwn, onSelect }: ListingOpt
       type="button"
       role="radio"
       aria-checked={selected}
+      tabIndex={tabIndex}
+      ref={ref}
       disabled={disabled}
       onClick={onSelect}
       className={cn(

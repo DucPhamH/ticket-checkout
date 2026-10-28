@@ -20,6 +20,7 @@ export const orderInclude = {
       seller: { select: { id: true, name: true } },
     },
   },
+  payment: { select: { providerResponseCode: true } },
 } as const;
 
 /**

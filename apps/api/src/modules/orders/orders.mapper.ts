@@ -17,5 +17,6 @@ export function toOrderDto(order: OrderWithDetails): OrderDto {
     createdAt: order.createdAt.toISOString(),
     expiresAt: order.expiresAt.toISOString(),
     paidAt: order.paidAt?.toISOString() ?? null,
+    paymentResultCode: order.payment?.providerResponseCode ?? null,
   };
 }

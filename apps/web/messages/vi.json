@@ -95,7 +95,20 @@
         "title": "Đã hoàn tiền",
         "body": "Tiền đã được hoàn về phương thức thanh toán của bạn."
       }
-    }
+    },
+    "failureReason": {
+      "09": "Thẻ/tài khoản chưa đăng ký Internet Banking.",
+      "10": "Xác thực thông tin thẻ/tài khoản sai quá 3 lần.",
+      "11": "Đã hết thời gian chờ thanh toán.",
+      "12": "Thẻ/tài khoản đang bị khoá.",
+      "13": "Nhập sai mã OTP.",
+      "24": "Bạn đã huỷ giao dịch.",
+      "51": "Tài khoản không đủ số dư.",
+      "65": "Tài khoản đã vượt hạn mức giao dịch trong ngày.",
+      "75": "Ngân hàng thanh toán đang bảo trì.",
+      "79": "Nhập sai mật khẩu thanh toán quá số lần cho phép."
+    },
+    "reasonLabel": "Lý do: {reason}"
   },
   "status": {
     "order": {
@@ -214,5 +227,12 @@
       "LISTING_NOT_FOUND": "Không tìm thấy tin đăng này.",
       "UNKNOWN": "Có lỗi xảy ra, hãy thử lại."
     }
+  },
+  "error": {
+    "title": "Không tải được trang",
+    "body": "Máy chủ đang gặp sự cố hoặc mất kết nối. Hãy thử lại sau giây lát.",
+    "retry": "Thử lại",
+    "home": "Về trang chủ",
+    "reference": "Mã lỗi: {digest}"
   }
 }

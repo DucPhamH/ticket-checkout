@@ -195,6 +195,16 @@ describe('failed payment', () => {
     expect(await availableOf(listing.id)).toBe(1);
     expect(await postingsFor(orderId)).toHaveLength(0);
   });
+
+  it("tells the buyer why: the order carries VNPay's result code", async () => {
+    const listing = await makeListing(1);
+    const { orderId, payment } = await buy(listing.id);
+    await ipn(ipnParams(payment.txnRef, payment.amount, '51', '02')); // insufficient funds
+
+    const res = await request(app).get(`/orders/${orderId}`).set('X-User-Id', String(buyerId));
+
+    expect(res.body).toMatchObject({ status: 'FAILED', paymentResultCode: '51' });
+  });
 });
 
 describe('rejected notifications change nothing', () => {

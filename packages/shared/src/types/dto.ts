@@ -54,6 +54,8 @@ export type OrderDto = {
   createdAt: string;
   expiresAt: string;
   paidAt: string | null;
+  // VNPay's result code for the payment (e.g. 24 = buyer cancelled, 51 = insufficient funds); null until known.
+  paymentResultCode: string | null;
 };
 
 export type BalancesDto = {

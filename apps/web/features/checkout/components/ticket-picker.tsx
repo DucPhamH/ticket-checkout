@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useMemo, useState } from 'react';
+import { useActionState, useMemo, useRef, useState } from 'react';
 import { AlertCircle, ChevronUp, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { calculateOrderAmounts, MAX_TICKETS_PER_ORDER, type ListingDto } from '@tc/shared';
@@ -36,6 +36,30 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
   function select(listing: ListingDto) {
     setSelectedId(listing.id);
     setQuantity(1);
+  }
+
+  // Keyboard, as in the ARIA radio group pattern: Tab reaches the group once (the selected option,
+  // or the first one that can be bought), and the arrow keys move between options and select them.
+  const optionRefs = useRef(new Map<number, HTMLButtonElement>());
+  const buyable = listings.filter((listing) => listing.seller.id !== currentUserId && listing.quantityAvailable > 0);
+  const tabStopId = selectedId ?? buyable[0]?.id;
+
+  function onRadioKeyDown(event: React.KeyboardEvent) {
+    const index = buyable.findIndex((listing) => listing.id === tabStopId);
+    const last = buyable.length - 1;
+    const target = {
+      ArrowDown: index + 1,
+      ArrowRight: index + 1,
+      ArrowUp: index - 1,
+      ArrowLeft: index - 1,
+      Home: 0,
+      End: last,
+    }[event.key];
+    if (target === undefined || buyable.length === 0) return;
+    event.preventDefault();
+    const next = buyable[(target + buyable.length) % buyable.length]; // wraps around
+    select(next);
+    optionRefs.current.get(next.id)?.focus();
   }
 
   const checkoutForm = selected && amounts && (
@@ -74,7 +98,7 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
             {t('event.listingsCount', { count: listings.length })}
           </span>
         </h2>
-        <div role="radiogroup" aria-label={t('event.listings')} className="space-y-2.5">
+        <div role="radiogroup" aria-label={t('event.listings')} className="space-y-2.5" onKeyDown={onRadioKeyDown}>
           {listings.map((listing) => (
             <ListingOption
               key={listing.id}
@@ -82,6 +106,11 @@ export function TicketPicker({ listings, currentUserId }: TicketPickerProps) {
               selected={listing.id === selectedId}
               isOwn={listing.seller.id === currentUserId}
               onSelect={() => select(listing)}
+              tabIndex={listing.id === tabStopId ? 0 : -1}
+              ref={(element) => {
+                if (element) optionRefs.current.set(listing.id, element);
+                else optionRefs.current.delete(listing.id);
+              }}
             />
           ))}
         </div>

@@ -18,7 +18,7 @@ export default async function OrderPage({ params }: PageProps<'/[locale]/orders/
   return (
     <Container className="max-w-lg py-4 sm:py-8">
       {order.status === 'PENDING' && <OrderAutoRefresh />}
-      <OrderResultHero status={order.status} />
+      <OrderResultHero order={order} />
       <OrderSummary order={order} locale={locale} />
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <Link href={ROUTES.wallet} className={buttonVariants({ variant: 'primary', fullWidth: true })}>

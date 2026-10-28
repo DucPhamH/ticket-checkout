@@ -95,7 +95,20 @@
         "title": "Refunded",
         "body": "Your money has been returned to your payment method."
       }
-    }
+    },
+    "failureReason": {
+      "09": "The card/account is not registered for internet banking.",
+      "10": "Card/account verification failed more than 3 times.",
+      "11": "The payment window timed out.",
+      "12": "The card/account is locked.",
+      "13": "The OTP was incorrect.",
+      "24": "You cancelled the payment.",
+      "51": "Insufficient funds.",
+      "65": "The account's daily transaction limit was exceeded.",
+      "75": "The paying bank is under maintenance.",
+      "79": "The payment password was entered wrongly too many times."
+    },
+    "reasonLabel": "Reason: {reason}"
   },
   "status": {
     "order": {
@@ -214,5 +227,12 @@
       "LISTING_NOT_FOUND": "Listing not found.",
       "UNKNOWN": "Something went wrong. Please try again."
     }
+  },
+  "error": {
+    "title": "This page could not be loaded",
+    "body": "The server is having trouble or cannot be reached. Please try again in a moment.",
+    "retry": "Try again",
+    "home": "Go to home",
+    "reference": "Error reference: {digest}"
   }
 }
