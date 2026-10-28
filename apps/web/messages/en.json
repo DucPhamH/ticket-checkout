@@ -144,7 +144,9 @@
     "trialBalanceHint": "Positive is a debit, negative a credit. The sum of every account must always be 0.",
     "account": "Account",
     "balance": "Balance",
-    "sum": "Sum"
+    "sum": "Sum",
+    "noEvents": "No events yet",
+    "sales": "{orders, plural, one {# paid order} other {# paid orders}} · {tickets, plural, one {# ticket} other {# tickets}}"
   },
   "notFound": {
     "title": "Page not found",

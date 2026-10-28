@@ -88,3 +88,16 @@ export type TrialBalanceDto = {
   accounts: { code: string; type: AccountType; balance: number }[]; // signed: + debit, − credit
   total: number; // always 0 in a healthy ledger
 };
+
+export type AdminEventDto = {
+  id: number;
+  name: string;
+  venue: string;
+  startsAt: string;
+  status: EventStatus;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  paidOrders: number; // orders paid for and not refunded
+  ticketsSold: number;
+  paidTotal: number; // what buyers paid for those orders, fees included
+};

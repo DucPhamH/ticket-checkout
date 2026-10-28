@@ -144,7 +144,9 @@
     "trialBalanceHint": "Số dương là Nợ (debit), số âm là Có (credit). Tổng tất cả tài khoản luôn phải bằng 0.",
     "account": "Tài khoản",
     "balance": "Số dư",
-    "sum": "Tổng"
+    "sum": "Tổng",
+    "noEvents": "Chưa có sự kiện nào",
+    "sales": "{orders} đơn đã thanh toán · {tickets} vé"
   },
   "notFound": {
     "title": "Không tìm thấy trang",
