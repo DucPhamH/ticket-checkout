@@ -55,6 +55,11 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
       data: { quantityAvailable: { decrement: input.quantity } },
     });
     if (reserved.count === 0) {
+      // Either sold out, or the seller withdrew the listing a moment ago.
+      const { status } = await tx.listing.findUniqueOrThrow({ where: { id: listing.id }, select: { status: true } });
+      if (status !== ListingStatus.ACTIVE) {
+        throw HttpError.conflict('LISTING_NOT_ON_SALE', 'This listing is no longer on sale');
+      }
       throw HttpError.conflict('NOT_ENOUGH_TICKETS', `Fewer than ${input.quantity} tickets left`);
     }
 

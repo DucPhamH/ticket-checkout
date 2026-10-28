@@ -96,7 +96,8 @@ describe('GET /events', () => {
   });
 
   it('returns dates as ISO strings and money as numbers', async () => {
-    const [event] = await getEvents();
+    // The seeded event, which has listings (other test files add events without any).
+    const event = (await getEvents()).find((e) => e.id === 1)!;
     expect(typeof event.minPrice).toBe('number');
     expect(new Date(event.startsAt).toISOString()).toBe(event.startsAt);
   });

@@ -5,6 +5,7 @@ import { requestLogger } from './middlewares/request-logger';
 import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
 import { eventsRouter } from './modules/events/events.router';
+import { listingsRouter } from './modules/listings/listings.router';
 import { ordersRouter } from './modules/orders/orders.router';
 import { paymentsRouter } from './modules/payments/payments.router';
 import { usersRouter } from './modules/users/users.router';
@@ -21,6 +22,7 @@ export function createApp() {
   app.use('/health', healthRouter);
   app.use(usersRouter);
   app.use(eventsRouter);
+  app.use(listingsRouter);
   app.use(ordersRouter);
   app.use(paymentsRouter);
   app.use(walletRouter);

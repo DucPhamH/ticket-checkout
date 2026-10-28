@@ -109,3 +109,23 @@ export type CompleteEventResultDto = {
   sellerPayouts: number; // moved from sellers' pending to available by this request
   platformRevenue: number; // fees earned by this request
 };
+
+export type CreateListingInput = {
+  eventId: number;
+  unitPrice: number; // VND, LISTING_PRICE_MIN..LISTING_PRICE_MAX in steps of LISTING_PRICE_STEP
+  quantity: number; // 1..MAX_TICKETS_PER_LISTING
+};
+
+// A listing as its seller sees it.
+export type MyListingDto = {
+  id: number;
+  event: { id: number; name: string; startsAt: string; status: EventStatus };
+  unitPrice: number;
+  status: ListingStatus;
+  quantityTotal: number;
+  quantityAvailable: number; // on sale now
+  ticketsReserved: number; // held by orders waiting for payment
+  ticketsSold: number; // in paid orders
+  createdAt: string;
+  withdrawnAt: string | null;
+};

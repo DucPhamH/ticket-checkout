@@ -3,6 +3,7 @@ import { env } from '../config/env';
 import { adminPaths } from '../modules/admin/admin.openapi';
 import { eventsPaths } from '../modules/events/events.openapi';
 import { healthPaths } from '../modules/health/health.openapi';
+import { listingsPaths } from '../modules/listings/listings.openapi';
 import { ordersPaths } from '../modules/orders/orders.openapi';
 import { paymentsPaths } from '../modules/payments/payments.openapi';
 import { usersPaths } from '../modules/users/users.openapi';
@@ -27,6 +28,7 @@ export const openApiDocument = createDocument(
       { name: 'System', description: 'Operational endpoints' },
       { name: 'Users', description: 'Demo users and the current user' },
       { name: 'Events', description: 'Events and the tickets listed for them' },
+      { name: 'Listings', description: 'Selling tickets' },
       { name: 'Orders', description: 'Buying tickets' },
       { name: 'Payments', description: 'VNPay redirects and notifications' },
       { name: 'Wallet', description: 'The current user’s balances and history, from the ledger' },
@@ -36,6 +38,7 @@ export const openApiDocument = createDocument(
       ...healthPaths,
       ...usersPaths,
       ...eventsPaths,
+      ...listingsPaths,
       ...ordersPaths,
       ...paymentsPaths,
       ...walletPaths,
