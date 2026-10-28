@@ -1,5 +1,5 @@
 // Design-phase fixtures. Deleted once services call the real api (step 4).
-import type { BalancesDto, LedgerLineDto, OrderDto } from '@tc/shared';
+import type { LedgerLineDto, OrderDto } from '@tc/shared';
 
 const ORDER_BASE = {
   event: {
@@ -26,13 +26,6 @@ export const MOCK_ORDERS: OrderDto[] = [
   { ...ORDER_BASE, id: 104, status: 'EXPIRED', paidAt: null },
   { ...ORDER_BASE, id: 105, status: 'REFUNDED', paidAt: '2026-10-25T03:02:00.000Z' },
 ];
-
-export const MOCK_BALANCES: Record<number, BalancesDto> = {
-  1: { pending: 855_000, available: 1_140_000, refundPending: 0 },
-  2: { pending: 0, available: 0, refundPending: 0 },
-  3: { pending: 0, available: 0, refundPending: 0 },
-  4: { pending: 0, available: 0, refundPending: 0 },
-};
 
 export const MOCK_LEDGER: LedgerLineDto[] = [
   {

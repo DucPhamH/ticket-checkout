@@ -5,6 +5,7 @@ import { healthPaths } from '../modules/health/health.openapi';
 import { ordersPaths } from '../modules/orders/orders.openapi';
 import { paymentsPaths } from '../modules/payments/payments.openapi';
 import { usersPaths } from '../modules/users/users.openapi';
+import { walletPaths } from '../modules/wallet/wallet.openapi';
 import { USER_ID_HEADER } from '../constants/http';
 import { ErrorResponseSchema } from './common';
 
@@ -27,6 +28,7 @@ export const openApiDocument = createDocument(
       { name: 'Events', description: 'Events and the tickets listed for them' },
       { name: 'Orders', description: 'Buying tickets' },
       { name: 'Payments', description: 'VNPay redirects and notifications' },
+      { name: 'Wallet', description: 'The current user’s balances and history, from the ledger' },
     ],
     paths: {
       ...healthPaths,
@@ -34,6 +36,7 @@ export const openApiDocument = createDocument(
       ...eventsPaths,
       ...ordersPaths,
       ...paymentsPaths,
+      ...walletPaths,
     },
     components: {
       schemas: { ErrorResponse: ErrorResponseSchema },
