@@ -142,6 +142,11 @@ Gửi một IPN có chữ ký qua đường hầm, đúng như VNPay sẽ gửi:
 IPN_BASE_URL=https://$NGROK_DOMAIN npm run vnpay:simulate-ipn -w @tc/api -- <mã đơn>
 ```
 
-Gói miễn phí của ngrok hiện một trang cảnh báo với request có User-Agent giống trình duyệt; các chương
-trình khác đi thẳng. Nếu IPN của VNPay có lúc bị chặn như vậy, VNPay sẽ gọi lại, và đối soát `querydr`
-vẫn xác nhận thanh toán khi khách quay về.
+Gói miễn phí của ngrok hiện một trang cảnh báo với request có User-Agent giống trình duyệt. IPN của
+VNPay gửi từ `VNPAY GATEWAY/2.0`, nên đi thẳng vào api.
+
+Đăng ký IPN URL trên trang merchant sandbox: đăng nhập, rồi mở
+`https://sandbox.vnpayment.vn/merchantv2/Account/TerminalEdit.htm` (Thông tin tài khoản → sửa website),
+điền IPN URL, giao thức GET, HMACSHA512, rồi lưu. Nút "Test call IPN" gửi chữ ký giả
+(`vnp_SecureHash=hash_test`) cho một mã giao dịch bịa, nên api trả `97 Invalid signature` là đúng; nút
+này chỉ chứng minh VNPay gọi được tới api, không hơn.

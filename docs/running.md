@@ -133,6 +133,11 @@ To send a signed IPN through the tunnel exactly as VNPay would:
 IPN_BASE_URL=https://$NGROK_DOMAIN npm run vnpay:simulate-ipn -w @tc/api -- <orderId>
 ```
 
-ngrok's free plan shows a browser warning page to requests whose User-Agent looks like a browser;
-other clients go straight through. If VNPay's IPN were ever caught by it, VNPay would retry and the
-`querydr` reconciliation would still settle the payment when the buyer returns.
+ngrok's free plan shows a browser warning page to requests whose User-Agent looks like a browser.
+VNPay's IPN comes from `VNPAY GATEWAY/2.0`, so it goes straight through.
+
+Register the IPN URL in the sandbox merchant portal: log in, then open
+`https://sandbox.vnpayment.vn/merchantv2/Account/TerminalEdit.htm` (Account Information → edit the
+website), set the IPN URL, protocol GET, HMACSHA512, and save. Its "Test call IPN" button sends a
+placeholder signature (`vnp_SecureHash=hash_test`) for a made-up reference, so the api correctly
+answers `97 Invalid signature`; it proves VNPay can reach the api, nothing more.
