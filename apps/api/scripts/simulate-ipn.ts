@@ -5,7 +5,8 @@
  *   npm run vnpay:simulate-ipn -w @tc/api -- <orderId> [responseCode]
  *
  * responseCode defaults to 00 (success); try 24 (buyer cancelled) or 51 (insufficient funds).
- * Uses the real VNP_HASH_SECRET from .env and sends to API_PUBLIC_URL.
+ * Uses the real VNP_HASH_SECRET from .env and sends to API_PUBLIC_URL, or to IPN_BASE_URL if set
+ * (e.g. the ngrok address, to send it through the tunnel exactly as VNPay would).
  */
 import { env } from '../src/config/env';
 import { prisma } from '../src/db/prisma';
@@ -38,9 +39,10 @@ async function main() {
     vnp_TxnRef: payment.txnRef,
   };
   const query = new URLSearchParams({ ...fields, vnp_SecureHash: signVnpayParams(fields, config.hashSecret) });
-  const url = `${env.API_PUBLIC_URL}/payments/vnpay/ipn?${query}`;
+  const base = process.env.IPN_BASE_URL ?? env.API_PUBLIC_URL;
+  const url = `${base}/payments/vnpay/ipn?${query}`;
 
-  console.log(`→ IPN for order ${orderId} (${payment.txnRef}), vnp_ResponseCode=${responseCode}`);
+  console.log(`→ IPN for order ${orderId} (${payment.txnRef}), vnp_ResponseCode=${responseCode}, to ${base}`);
   const res = await fetch(url);
   console.log(`← HTTP ${res.status}`, await res.json());
 

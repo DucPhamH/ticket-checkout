@@ -15,7 +15,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "tunnel": "NGROK_UPSTREAM=host.docker.internal:4000 docker compose --profile tunnel up ngrok"
   },
   "engines": {
     "node": ">=20.19"

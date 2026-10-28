@@ -53,19 +53,20 @@ services:
       api:
         condition: service_healthy
 
-  # Optional: exposes the api publicly so VNPay can deliver IPN.
-  # Run with: docker compose --profile tunnel up
+  # Optional: gives the api a public HTTPS address so VNPay can deliver IPN.
+  #   api in Docker:          docker compose --profile tunnel up -d
+  #   api in dev mode (host): npm run tunnel   (sets NGROK_UPSTREAM=host.docker.internal:4000)
+  # Inspector with every request that came through: http://localhost:4040
   ngrok:
     image: ngrok/ngrok:latest
     profiles: ['tunnel']
-    command: ['http', '--url=${NGROK_DOMAIN:-}', 'api:4000']
+    command: ['http', '--url=${NGROK_DOMAIN:-}', '${NGROK_UPSTREAM:-api:4000}']
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
     ports:
       - '4040:4040'
-    depends_on:
-      api:
-        condition: service_healthy
+    extra_hosts:
+      - 'host.docker.internal:host-gateway' # lets the container reach the api running on the host
 
 volumes:
   db-data:

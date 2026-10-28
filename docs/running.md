@@ -112,3 +112,27 @@ running.
 ```bash
 npm run vnpay:reconcile -w @tc/api -- 637    # asks VNPay (querydr) and applies the answer
 ```
+
+## Tunnel for VNPay's IPN
+
+VNPay must reach the api over HTTPS. ngrok gives it the fixed address in `NGROK_DOMAIN`
+(`NGROK_AUTHTOKEN` and `NGROK_DOMAIN` in `.env`):
+
+```bash
+npm run tunnel                              # api in dev mode on the host
+docker compose --profile tunnel up -d       # api in Docker
+curl https://$NGROK_DOMAIN/health           # reachable from the internet
+```
+
+The IPN URL to register with VNPay is `https://<NGROK_DOMAIN>/payments/vnpay/ipn`. Every request
+that comes through the tunnel is listed at http://localhost:4040.
+
+To send a signed IPN through the tunnel exactly as VNPay would:
+
+```bash
+IPN_BASE_URL=https://$NGROK_DOMAIN npm run vnpay:simulate-ipn -w @tc/api -- <orderId>
+```
+
+ngrok's free plan shows a browser warning page to requests whose User-Agent looks like a browser;
+other clients go straight through. If VNPay's IPN were ever caught by it, VNPay would retry and the
+`querydr` reconciliation would still settle the payment when the buyer returns.

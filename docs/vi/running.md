@@ -121,3 +121,27 @@ Script ký IPN bằng `VNP_HASH_SECRET` thật rồi gửi tới `API_PUBLIC_URL
 ```bash
 npm run vnpay:reconcile -w @tc/api -- 637    # hỏi VNPay (querydr) rồi áp dụng câu trả lời
 ```
+
+## Đường hầm cho IPN của VNPay
+
+VNPay phải gọi được api qua HTTPS. ngrok cấp địa chỉ cố định trong `NGROK_DOMAIN` (`NGROK_AUTHTOKEN` và
+`NGROK_DOMAIN` nằm trong `.env`):
+
+```bash
+npm run tunnel                              # api chạy chế độ dev trên máy
+docker compose --profile tunnel up -d       # api chạy trong Docker
+curl https://$NGROK_DOMAIN/health           # gọi được từ internet
+```
+
+IPN URL cần đăng ký với VNPay là `https://<NGROK_DOMAIN>/payments/vnpay/ipn`. Mọi request đi qua đường hầm
+được liệt kê ở http://localhost:4040.
+
+Gửi một IPN có chữ ký qua đường hầm, đúng như VNPay sẽ gửi:
+
+```bash
+IPN_BASE_URL=https://$NGROK_DOMAIN npm run vnpay:simulate-ipn -w @tc/api -- <mã đơn>
+```
+
+Gói miễn phí của ngrok hiện một trang cảnh báo với request có User-Agent giống trình duyệt; các chương
+trình khác đi thẳng. Nếu IPN của VNPay có lúc bị chặn như vậy, VNPay sẽ gọi lại, và đối soát `querydr`
+vẫn xác nhận thanh toán khi khách quay về.
