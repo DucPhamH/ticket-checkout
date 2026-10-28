@@ -9,3 +9,12 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
 export const USER_ROLES = ['USER', 'ADMIN'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
+
+export const LEDGER_TRANSACTION_KINDS = [
+  'PAYMENT_CAPTURED',
+  'EVENT_SETTLED',
+  'ORDER_CANCELLED',
+  'LATE_PAYMENT',
+  'REFUND_COMPLETED',
+] as const;
+export type LedgerTransactionKind = (typeof LEDGER_TRANSACTION_KINDS)[number];

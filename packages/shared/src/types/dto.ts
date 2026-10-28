@@ -1,4 +1,4 @@
-import type { EventStatus, ListingStatus, OrderStatus, UserRole } from '../constants/status';
+import type { EventStatus, LedgerTransactionKind, ListingStatus, OrderStatus, UserRole } from '../constants/status';
 
 // Shapes returned by the api. Money is in VND (integer); dates are ISO strings.
 
@@ -58,7 +58,7 @@ export type BalancesDto = {
 export type LedgerLineDto = {
   id: number;
   createdAt: string;
-  kind: string;
+  kind: LedgerTransactionKind;
   account: string;
   amount: number; // signed: + debit, − credit
   orderId: number | null;

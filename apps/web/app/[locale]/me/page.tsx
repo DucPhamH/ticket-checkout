@@ -15,7 +15,7 @@ export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) 
     getTranslations('wallet'),
     getBalances(user.id),
     listMyOrders(),
-    listMyLedger(user.id),
+    listMyLedger(),
   ]);
 
   return (
@@ -37,7 +37,7 @@ export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) 
           <CardHeader className="pb-2">
             <CardTitle>{t('ledger')}</CardTitle>
           </CardHeader>
-          <LedgerList lines={ledger} locale={locale} />
+          <LedgerList key={user.id} page={ledger} locale={locale} />
         </Card>
       </div>
     </Container>
