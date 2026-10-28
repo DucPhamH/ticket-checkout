@@ -4,15 +4,16 @@ import { prisma } from '../../db/prisma';
 import { PaymentNotificationSource } from '../../generated/prisma/enums';
 import { logger } from '../../lib/logger';
 import { RETURN_RESULT } from './payments.constants';
+import { reconcilePayment } from './payments.reconcile';
 import { getVnpayConfig } from './vnpay/vnpay.config';
 import { isVnpaySuccess } from './vnpay/vnpay.result';
 import { verifyVnpaySignature, type VnpayParams } from './vnpay/vnpay.signature';
 
 /**
- * The buyer's browser coming back from VNPay. Per VNPay's spec this only verifies and records
- * what the gateway said, then decides where to send the browser: it never changes the order or
- * the payment. The browser can be closed, replayed or tampered with; IPN (server to server) is
- * what settles the payment.
+ * The buyer's browser coming back from VNPay. Per VNPay's spec the query string only gets verified
+ * and recorded: it never changes the order or the payment (the browser can be closed, replayed or
+ * tampered with). If IPN has not settled the payment yet, we ask VNPay ourselves (querydr) and apply
+ * its answer, so the buyer usually lands on a final status even when IPN is late or missing.
  *
  * Returns the URL to redirect to. It is built only from our own config and ids from our database,
  * never from the query, so this endpoint cannot be used to redirect people elsewhere.
@@ -23,7 +24,10 @@ export async function handleVnpayReturn(params: VnpayParams, locale: SupportedLo
   if (!txnRef) return home; // not a VNPay redirect at all: nothing worth recording
 
   const signatureValid = verifyVnpaySignature(params, getVnpayConfig().hashSecret);
-  const payment = await prisma.payment.findUnique({ where: { txnRef }, select: { id: true, orderId: true } });
+  const payment = await prisma.payment.findUnique({
+    where: { txnRef },
+    select: { id: true, orderId: true, providerResponseCode: true },
+  });
 
   const result = !signatureValid
     ? RETURN_RESULT.invalidSignature
@@ -48,6 +52,12 @@ export async function handleVnpayReturn(params: VnpayParams, locale: SupportedLo
     { txnRef, result, responseCode: params.vnp_ResponseCode, transactionStatus: params.vnp_TransactionStatus },
     'vnpay return',
   );
+
+  // The query string is never trusted to change anything. If IPN has not settled the payment yet,
+  // ask VNPay directly (querydr): its signed server-to-server answer is trusted, like an IPN.
+  if (signatureValid && payment && payment.providerResponseCode === null) {
+    await reconcilePayment(payment.id);
+  }
 
   // The order page shows the status from the database, whatever the query claimed.
   return payment ? `${home}/orders/${payment.orderId}` : home;

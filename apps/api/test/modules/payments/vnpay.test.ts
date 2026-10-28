@@ -15,6 +15,7 @@ const config = {
   tmnCode: 'TESTCODE',
   hashSecret: SECRET,
   payUrl: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
+  apiUrl: 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction',
 };
 
 // Decodes a URL query the way Express does (so "+" becomes a space).
@@ -149,10 +150,20 @@ describe('buildVnpayPaymentUrl', () => {
 });
 
 describe('getVnpayConfig', () => {
-  const valid = { VNP_TMN_CODE: 'ABCD1234', VNP_HASH_SECRET: 'secret', VNP_PAY_URL: 'https://sandbox.vnpayment.vn/x' };
+  const valid = {
+    VNP_TMN_CODE: 'ABCD1234',
+    VNP_HASH_SECRET: 'secret',
+    VNP_PAY_URL: 'https://sandbox.vnpayment.vn/x',
+    VNP_API_URL: 'https://sandbox.vnpayment.vn/api',
+  };
 
   it('returns the credentials when they are valid', () => {
-    expect(getVnpayConfig(valid)).toEqual({ tmnCode: 'ABCD1234', hashSecret: 'secret', payUrl: valid.VNP_PAY_URL });
+    expect(getVnpayConfig(valid)).toEqual({
+      tmnCode: 'ABCD1234',
+      hashSecret: 'secret',
+      payUrl: valid.VNP_PAY_URL,
+      apiUrl: valid.VNP_API_URL,
+    });
   });
 
   it('lists every problem when credentials are missing', () => {

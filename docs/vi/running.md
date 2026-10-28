@@ -115,3 +115,9 @@ npm run vnpay:simulate-ipn -w @tc/api -- 636 24     # khách huỷ: FAILED, tr�
 ```
 
 Script ký IPN bằng `VNP_HASH_SECRET` thật rồi gửi tới `API_PUBLIC_URL`, nên api phải đang chạy.
+
+## Đối soát một thanh toán bằng tay
+
+```bash
+npm run vnpay:reconcile -w @tc/api -- 637    # hỏi VNPay (querydr) rồi áp dụng câu trả lời
+```

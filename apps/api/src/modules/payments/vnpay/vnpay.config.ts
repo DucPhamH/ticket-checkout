@@ -5,6 +5,7 @@ export type VnpayConfig = {
   tmnCode: string;
   hashSecret: string;
   payUrl: string;
+  apiUrl: string; // querydr / refund
 };
 
 const schema = z.object({
@@ -13,6 +14,7 @@ const schema = z.object({
     .regex(/^[A-Za-z0-9]{8}$/, 'VNP_TMN_CODE must be the 8-character terminal code from VNPay'),
   VNP_HASH_SECRET: z.string({ error: 'VNP_HASH_SECRET is missing' }).min(1, 'VNP_HASH_SECRET is empty'),
   VNP_PAY_URL: z.url(),
+  VNP_API_URL: z.url(),
 });
 
 /**
@@ -30,5 +32,6 @@ export function getVnpayConfig(source: Record<string, unknown> = env): VnpayConf
     tmnCode: result.data.VNP_TMN_CODE,
     hashSecret: result.data.VNP_HASH_SECRET,
     payUrl: result.data.VNP_PAY_URL,
+    apiUrl: result.data.VNP_API_URL,
   };
 }

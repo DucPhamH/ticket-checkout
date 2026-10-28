@@ -2,8 +2,8 @@
 
 [English](../05-payments.md)
 
-> Trạng thái: phần ký, tạo payment, return URL và IPN đã làm. IPN được thử ở máy bằng script giả lập;
-> nhận IPN thật từ VNPay qua tunnel và đối soát `querydr` làm tiếp theo.
+> Trạng thái: phần ký, tạo payment, return URL, IPN và đối soát `querydr` đã làm; nhận IPN thật từ
+> VNPay qua tunnel làm tiếp theo.
 
 ## Vì sao chọn VNPay
 
@@ -143,3 +143,24 @@ ba mã thất bại, và `97`/`01`/`04`/`99`.
 
 Ở máy local, `npm run vnpay:simulate-ipn -w @tc/api -- <mã đơn> [mã kết quả]` đóng vai VNPay: ký một IPN
 bằng secret thật rồi gửi tới api đang chạy.
+
+## Đối soát bằng querydr (đã làm)
+
+Khi IPN tới muộn hoặc không bao giờ tới, mình tự hỏi VNPay (`modules/payments/payments.reconcile.ts`,
+client ở `vnpay/vnpay.querydr.ts`):
+
+- POST JSON tới `VNP_API_URL`, ký trên các trường của request nối bằng `|` theo đúng thứ tự trong tài
+  liệu. Câu trả lời của VNPay cũng được ký theo cách đó; công thức trong tài liệu thiếu một dấu `|` giữa
+  `vnp_Amount` và `vnp_BankCode`, bổ sung vào thì chữ ký của sandbox thật khớp. Câu trả lời sai chữ ký
+  bị từ chối.
+- Với querydr, `vnp_ResponseCode` là kết quả của chính lần hỏi (`91` = VNPay không có giao dịch này),
+  còn `vnp_TransactionStatus` là kết quả thanh toán (`00` đã trả, `01` đang xử lý, còn lại là thất bại).
+- Câu trả lời được áp dụng qua đúng hàm `settleGatewayResult` của IPN (cùng khoá dòng, cùng chặn "đã
+  áp dụng", cùng bút toán), nên IPN và querydr không bao giờ cùng áp dụng một kết quả hai lần.
+- Hỏi VNPay khi: khách quay về return URL mà payment chưa có kết quả; trang đơn đang làm mới
+  (`GET /orders/:id`), khách đã từng quay về từ VNPay, tối đa 10 giây một lần; và bằng tay với
+  `npm run vnpay:reconcile -w @tc/api -- <mã đơn>`. Mỗi lần hỏi được lưu vào `payment_notifications`
+  (`source = QUERY`) kèm kết quả.
+
+Đã kiểm chứng với sandbox: một đơn trả bằng thẻ test NCB mà IPN không tới đã được đối soát thành `PAID`,
+kèm mã giao dịch của VNPay, và bút toán ghi nhận tiền đã được ghi.

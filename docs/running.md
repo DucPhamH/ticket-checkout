@@ -106,3 +106,9 @@ npm run vnpay:simulate-ipn -w @tc/api -- 636 24     # buyer cancelled: FAILED, t
 
 It signs the IPN with the real `VNP_HASH_SECRET` and sends it to `API_PUBLIC_URL`, so the api must be
 running.
+
+## Reconciling a payment by hand
+
+```bash
+npm run vnpay:reconcile -w @tc/api -- 637    # asks VNPay (querydr) and applies the answer
+```

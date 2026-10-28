@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/05-payments.md)
 
-> Status: signing, payment creation, the return URL and IPN are built. IPN is tested locally with a
-> simulator; receiving it from VNPay through the tunnel, and `querydr` reconciliation, come next.
+> Status: signing, payment creation, the return URL, IPN and `querydr` reconciliation are built;
+> receiving IPN from VNPay through the tunnel comes next.
 
 ## Why VNPay
 
@@ -142,3 +142,24 @@ three failure codes, and `97`/`01`/`04`/`99`.
 
 Locally, `npm run vnpay:simulate-ipn -w @tc/api -- <orderId> [responseCode]` plays VNPay: it signs
 an IPN with the real secret and sends it to the running api.
+
+## Reconciliation with querydr (built)
+
+When IPN is late or never arrives, we ask VNPay ourselves (`modules/payments/payments.reconcile.ts`,
+client in `vnpay/vnpay.querydr.ts`):
+
+- POST JSON to `VNP_API_URL`, signed over the request fields joined with `|` in the documented
+  order. VNPay's answer is signed the same way; the spec's response formula is missing a `|`
+  between `vnp_Amount` and `vnp_BankCode`, and with it restored the live sandbox's signature
+  verifies. An answer that does not verify is rejected.
+- For querydr, `vnp_ResponseCode` is the query's own result (`91` = no such payment at VNPay) and
+  `vnp_TransactionStatus` is the payment's (`00` paid, `01` processing, otherwise failed).
+- The answer is applied by the same `settleGatewayResult` as IPN (same locks, same "already
+  applied" guard, same ledger postings), so IPN and querydr can never both apply a result.
+- Asked: on the return URL when the payment is still unsettled; on `GET /orders/:id` while the
+  buyer waits, once they have come back from VNPay, at most every 10 seconds; and by hand with
+  `npm run vnpay:reconcile -w @tc/api -- <orderId>`. Each query is stored in
+  `payment_notifications` (`source = QUERY`) with its outcome.
+
+Verified against the sandbox: an order paid with the NCB test card whose IPN never arrived was
+reconciled to `PAID` with VNPay's transaction number and the capture posted.

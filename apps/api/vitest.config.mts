@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     // Recreates the *_test database (migrations + seed) before the suite runs.
     globalSetup: ['./test/setup/global-setup.ts'],
+    // Blocks real network calls in every test; tests mock the gateway's answers.
+    setupFiles: ['./test/setup/no-network.ts'],
+    restoreMocks: true,
     env: {
       DATABASE_URL: testDatabaseUrl(),
       // Fake VNPay credentials: tests never sign with the real secret.

@@ -97,3 +97,11 @@ nằm ở điểm khởi động server, nên seed, migration và test vẫn ch�
 **Test chạy trên database riêng, dựng lại mỗi lần chạy.** Khi test bắt đầu ghi sổ cái thật (chỉ thêm,
 không xoá) qua api thì không thể dọn dẹp sau test được nữa, nên bộ test tạo lại `tc_test` (migration +
 seed) trước khi chạy. Database dev không bao giờ bị đụng tới.
+
+**querydr là lưới an toàn cho IPN.** Kết quả thanh toán được áp dụng ở một chỗ duy nhất
+(`settleGatewayResult`), dù tới từ IPN hay từ lần mình tự hỏi, nên hai đường không thể lệch nhau hay áp
+dụng hai lần. Việc hỏi được kích hoạt khi khách quay về hoặc đang chờ ở trang đơn, giới hạn tối đa 10
+giây một lần cho mỗi payment.
+
+**Test không gọi mạng thật.** Một file setup làm mọi lệnh `fetch` thất bại trừ khi test giả lập câu trả
+lời của cổng, nên bộ test không bao giờ phụ thuộc vào, hay gửi credential tới, dịch vụ bên ngoài.

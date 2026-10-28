@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../../src/app';
 import { prisma } from '../../../src/db/prisma';
 import { signVnpayParams } from '../../../src/modules/payments/vnpay/vnpay.signature';
+import { mockVnpayQuery } from '../../helpers/vnpay';
 
 const app = createApp();
 const TAG = '[vnpay-return.test]';
@@ -45,7 +46,7 @@ const returned = (txnRef: string, responseCode = '00', transactionStatus = '00')
   });
 
 const lastNotification = (paymentId: number | null) =>
-  prisma.paymentNotification.findFirstOrThrow({ where: { paymentId }, orderBy: { id: 'desc' } });
+  prisma.paymentNotification.findFirstOrThrow({ where: { paymentId, source: 'RETURN' }, orderBy: { id: 'desc' } });
 
 beforeAll(async () => {
   buyerId = (await prisma.user.create({ data: { name: `${TAG} buyer` } })).id;
@@ -56,26 +57,11 @@ beforeAll(async () => {
   ).id;
 });
 
-afterAll(async () => {
-  const payments = { order: { listing: { eventId } } };
-  await prisma.paymentNotification.deleteMany({
-    where: {
-      OR: [
-        { payment: payments },
-        { paymentId: null, payload: { path: ['vnp_TxnRef'], string_starts_with: 'unknown-' } },
-      ],
-    },
-  });
-  await prisma.payment.deleteMany({ where: payments });
-  await prisma.order.deleteMany({ where: { listing: { eventId } } });
-  await prisma.listing.deleteMany({ where: { eventId } });
-  await prisma.event.deleteMany({ where: { id: eventId } });
-  await prisma.user.deleteMany({ where: { name: { startsWith: TAG } } });
-  await prisma.$disconnect();
-});
+// No cleanup: the test database is recreated on every run, and ledger rows can't be deleted anyway.
+afterAll(() => prisma.$disconnect());
 
 describe('GET /payments/vnpay/return/:locale', () => {
-  it('records a signed success and sends the browser to the order page, changing nothing', async () => {
+  it('records a signed success and redirects; the query string itself changes nothing', async () => {
     const { orderId, payment } = await openPayment();
 
     const res = await request(app).get('/payments/vnpay/return/vi').query(returned(payment.txnRef));
@@ -88,7 +74,8 @@ describe('GET /payments/vnpay/return/:locale', () => {
       result: 'REPORTED_SUCCESS',
       payload: expect.objectContaining({ vnp_TxnRef: payment.txnRef, vnp_ResponseCode: '00' }),
     });
-    // The return URL is never trusted to settle a payment: IPN does that.
+    // The query string is never trusted to settle a payment. (Here VNPay cannot be reached, so the
+    // querydr fallback fails and the order stays as it was.)
     expect((await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).status).toBe('PENDING');
     expect((await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })).status).toBe('PENDING');
   });
@@ -145,5 +132,38 @@ describe('GET /payments/vnpay/return/:locale', () => {
       .get('/payments/vnpay/return/vi')
       .query({ ...returned('unknown-ref-2'), next: 'https://evil.example', redirect: 'https://evil.example' });
     expect(res.headers.location.startsWith(`${WEB}/`)).toBe(true);
+  });
+});
+
+describe('querydr fallback on return', () => {
+  it('asks VNPay when IPN has not arrived, and settles the order from its signed answer', async () => {
+    const { orderId, payment } = await openPayment();
+    const fetchSpy = mockVnpayQuery({
+      vnp_TxnRef: payment.txnRef,
+      vnp_Amount: '11000000',
+      vnp_TransactionStatus: '00',
+    });
+
+    const res = await request(app).get('/payments/vnpay/return/vi').query(returned(payment.txnRef));
+
+    expect(res.headers.location).toBe(`${WEB}/vi/orders/${orderId}`);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect((await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).status).toBe('PAID');
+    expect(
+      await prisma.paymentNotification.findFirst({ where: { paymentId: payment.id, source: 'QUERY' } }),
+    ).toMatchObject({ result: 'SUCCESS_APPLIED', signatureValid: true });
+  });
+
+  it('does not ask VNPay when IPN already settled the payment', async () => {
+    const { payment } = await openPayment();
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { providerResponseCode: '00', status: 'SUCCEEDED' },
+    });
+    const fetchSpy = mockVnpayQuery({});
+
+    await request(app).get('/payments/vnpay/return/vi').query(returned(payment.txnRef));
+
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

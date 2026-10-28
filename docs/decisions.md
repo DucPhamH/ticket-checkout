@@ -98,3 +98,11 @@ check lives in the server entry point, so the seed, migrations and tests run wit
 **Tests run against their own database, rebuilt every run.** Once tests post real ledger entries
 (append-only) through the api, cleaning up after them is impossible, so the suite recreates
 `tc_test` (migrations + seed) before it starts. The dev database is never touched.
+
+**querydr as the safety net for IPN.** Payment results are applied in one place
+(`settleGatewayResult`) whether they come from IPN or from our own query, so the two paths cannot
+diverge or double-apply. Queries are triggered by the buyer coming back or waiting on the order page,
+throttled to one per 10 seconds per payment.
+
+**No real network in tests.** A setup file makes every `fetch` fail unless a test mocks the gateway's
+answer, so the suite never depends on, or sends credentials to, an outside service.

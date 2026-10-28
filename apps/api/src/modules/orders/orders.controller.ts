@@ -3,6 +3,7 @@ import type { CreateOrderResponse } from '@tc/shared';
 import { HttpError } from '../../lib/http-error';
 import { clientIp } from '../../lib/client-ip';
 import { requireCurrentUser } from '../../middlewares/current-user';
+import { reconcileIfDue } from '../payments/payments.reconcile';
 import { paymentUrlFor } from '../payments/payments.service';
 import { toOrderDto } from './orders.mapper';
 import { CreateOrderBodySchema, OrderIdParamsSchema } from './orders.schema';
@@ -17,7 +18,13 @@ export const postOrder: RequestHandler = async (req, res) => {
 
 export const getOrder: RequestHandler = async (req, res) => {
   const { id } = OrderIdParamsSchema.parse(req.params);
-  const order = await findOrderForBuyer(id, requireCurrentUser(req).id);
+  const buyerId = requireCurrentUser(req).id;
+  let order = await findOrderForBuyer(id, buyerId);
   if (!order) throw HttpError.notFound('ORDER_NOT_FOUND', `No order with id ${id}`);
+  if (order.status === 'PENDING') {
+    // The buyer is waiting on the order page: if IPN is late, ask VNPay (throttled), then re-read.
+    await reconcileIfDue(order.id);
+    order = (await findOrderForBuyer(id, buyerId)) ?? order;
+  }
   res.json(toOrderDto(order));
 };
