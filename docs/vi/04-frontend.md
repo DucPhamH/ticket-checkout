@@ -15,13 +15,13 @@ components/layout/         Container, thanh điều hướng, nút đổi ngôn 
 components/pricing/        PriceBreakdown (checkout và orders cùng dùng)
 constants/                 hằng số toàn app (route, URL api, cookie phiên, màu trạng thái sự kiện)
 lib/                       cn(), định dạng, api-client, session
+hooks/                     hook dùng chung phía client (useLoadMore cho danh sách phân trang cursor)
 features/<tính năng>/
   components/              giao diện riêng của tính năng
   api.ts                   lấy dữ liệu, chỉ chạy ở server
   actions.ts               server action (thay đổi dữ liệu)
   constants.ts
 i18n/, messages/           ngôn ngữ và toàn bộ chữ hiển thị
-mocks/                     dữ liệu giả giai đoạn thiết kế, xoá khi api.ts gọi api thật
 ```
 
 Các tính năng: `events`, `checkout`, `orders`, `wallet`, `admin`, `users`.

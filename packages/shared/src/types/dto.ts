@@ -80,3 +80,11 @@ export type CreateOrderResponse = {
   // Signed VNPay URL; the buyer's browser is sent here to pay.
   paymentUrl: string;
 };
+
+export const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'REVENUE'] as const;
+export type AccountType = (typeof ACCOUNT_TYPES)[number];
+
+export type TrialBalanceDto = {
+  accounts: { code: string; type: AccountType; balance: number }[]; // signed: + debit, − credit
+  total: number; // always 0 in a healthy ledger
+};

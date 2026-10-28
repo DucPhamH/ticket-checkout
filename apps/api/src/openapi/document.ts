@@ -1,5 +1,6 @@
 import { createDocument } from 'zod-openapi';
 import { env } from '../config/env';
+import { adminPaths } from '../modules/admin/admin.openapi';
 import { eventsPaths } from '../modules/events/events.openapi';
 import { healthPaths } from '../modules/health/health.openapi';
 import { ordersPaths } from '../modules/orders/orders.openapi';
@@ -29,6 +30,7 @@ export const openApiDocument = createDocument(
       { name: 'Orders', description: 'Buying tickets' },
       { name: 'Payments', description: 'VNPay redirects and notifications' },
       { name: 'Wallet', description: 'The current user’s balances and history, from the ledger' },
+      { name: 'Admin', description: 'Admin only: event settlement and ledger checks' },
     ],
     paths: {
       ...healthPaths,
@@ -37,6 +39,7 @@ export const openApiDocument = createDocument(
       ...ordersPaths,
       ...paymentsPaths,
       ...walletPaths,
+      ...adminPaths,
     },
     components: {
       schemas: { ErrorResponse: ErrorResponseSchema },

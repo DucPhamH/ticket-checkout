@@ -1,6 +1,7 @@
 import 'server-only';
-import { MOCK_TRIAL_BALANCE } from '@/mocks/data';
+import type { TrialBalanceDto } from '@tc/shared';
+import { apiRequest } from '@/lib/api-client';
 
-export async function getTrialBalance() {
-  return MOCK_TRIAL_BALANCE;
+export function getTrialBalance(): Promise<TrialBalanceDto> {
+  return apiRequest<TrialBalanceDto>('/admin/trial-balance');
 }

@@ -141,7 +141,7 @@
     "cancel": "Cancel event",
     "completeHint": "Releases escrowed money to sellers.",
     "trialBalance": "Trial balance",
-    "trialBalanceHint": "The sum of every ledger account must always be 0.",
+    "trialBalanceHint": "Positive is a debit, negative a credit. The sum of every account must always be 0.",
     "account": "Account",
     "balance": "Balance",
     "sum": "Sum"

@@ -3,12 +3,12 @@ import { CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatVnd } from '@/lib/format';
 import { cn } from '@/lib/cn';
+import type { TrialBalanceDto } from '@tc/shared';
 
-type Row = { account: string; balance: number };
-
-export async function TrialBalance({ rows, locale }: { rows: Row[]; locale: string }) {
+// Balances as stored: + debit, − credit. The total comes from the api, which sums the ledger.
+export async function TrialBalance({ trialBalance, locale }: { trialBalance: TrialBalanceDto; locale: string }) {
   const t = await getTranslations('admin');
-  const sum = rows.reduce((acc, row) => acc + row.balance, 0);
+  const sum = trialBalance.total;
 
   return (
     <Card>
@@ -25,9 +25,9 @@ export async function TrialBalance({ rows, locale }: { rows: Row[]; locale: stri
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {rows.map((row) => (
-              <tr key={row.account}>
-                <td className="py-2 font-mono text-xs break-all">{row.account}</td>
+            {trialBalance.accounts.map((row) => (
+              <tr key={row.code}>
+                <td className="py-2 font-mono text-xs break-all">{row.code}</td>
                 <td className="py-2 text-right tabular-nums">{formatVnd(row.balance, locale)}</td>
               </tr>
             ))}

@@ -141,7 +141,7 @@
     "cancel": "Huỷ sự kiện",
     "completeHint": "Giải ngân tiền escrow cho người bán.",
     "trialBalance": "Bảng cân đối thử",
-    "trialBalanceHint": "Tổng tất cả tài khoản trong sổ cái luôn phải bằng 0.",
+    "trialBalanceHint": "Số dương là Nợ (debit), số âm là Có (credit). Tổng tất cả tài khoản luôn phải bằng 0.",
     "account": "Tài khoản",
     "balance": "Số dư",
     "sum": "Tổng"

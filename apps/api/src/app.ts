@@ -1,5 +1,6 @@
 import express from 'express';
 import { errorHandler } from './middlewares/error-handler';
+import { adminRouter } from './modules/admin/admin.router';
 import { requestLogger } from './middlewares/request-logger';
 import { notFound } from './middlewares/not-found';
 import { healthRouter } from './modules/health/health.router';
@@ -23,6 +24,7 @@ export function createApp() {
   app.use(ordersRouter);
   app.use(paymentsRouter);
   app.use(walletRouter);
+  app.use(adminRouter);
   app.use(openApiRouter);
 
   app.use(notFound);

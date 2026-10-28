@@ -1,6 +1,7 @@
 import { ACCOUNTS } from '../../constants/ledger';
 import { prisma } from '../../db/prisma';
 import { Prisma } from '../../generated/prisma/client';
+import type { AccountType } from '../../generated/prisma/enums';
 
 // What we owe one user, in VND. All three are liability accounts, so a credit increases them.
 export type UserBalances = {
@@ -35,4 +36,24 @@ export async function getUserBalances(userId: number, db: Prisma.TransactionClie
     available: balanceOf(codes.available),
     refundPending: balanceOf(codes.refundPending),
   };
+}
+
+export type TrialBalance = {
+  accounts: { code: string; type: AccountType; balance: bigint }[];
+  total: bigint;
+};
+
+/**
+ * Every account's balance as stored (debit-positive), and their total. Each posting sums to zero,
+ * so the total must be zero; anything else means the ledger is broken.
+ */
+export async function getTrialBalance(db: Prisma.TransactionClient = prisma): Promise<TrialBalance> {
+  const accounts = await db.$queryRaw<TrialBalance['accounts']>`
+    SELECT a.code, a.type, COALESCE(SUM(e.amount), 0)::bigint AS balance
+    FROM accounts a
+    LEFT JOIN ledger_entries e ON e.account_id = a.id
+    GROUP BY a.id
+    ORDER BY a.code
+  `;
+  return { accounts, total: accounts.reduce((sum, account) => sum + account.balance, 0n) };
 }

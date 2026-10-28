@@ -27,7 +27,7 @@ export default async function AdminPage({ params }: PageProps<'/[locale]/admin'>
       <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
       <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
         <EventAdminList events={events} locale={locale} />
-        <TrialBalance rows={trialBalance} locale={locale} />
+        <TrialBalance trialBalance={trialBalance} locale={locale} />
       </div>
     </Container>
   );

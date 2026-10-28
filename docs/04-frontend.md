@@ -15,13 +15,13 @@ components/layout/      Container, nav, locale switcher
 components/pricing/     PriceBreakdown (used by checkout and orders)
 constants/              app-wide constants (routes, api URL, session cookie, event status colours)
 lib/                    cn(), formatting, api-client, session
+hooks/                  shared client hooks (useLoadMore for cursor-paginated lists)
 features/<feature>/
   components/           UI owned by this feature
   api.ts                server-only data access
   actions.ts            server actions (mutations)
   constants.ts
 i18n/, messages/        locales and all user-facing strings
-mocks/                  design-phase fixtures, removed once api.ts calls the real api
 ```
 
 Features: `events`, `checkout`, `orders`, `wallet`, `admin`, `users`.
