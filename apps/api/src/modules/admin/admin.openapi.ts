@@ -1,6 +1,12 @@
 import type { ZodOpenApiPathsObject } from 'zod-openapi';
 import { errorResponse, jsonResponse } from '../../openapi/common';
-import { AdminEventPageSchema, AdminEventsQuerySchema, TrialBalanceSchema } from './admin.schema';
+import { EventIdParamsSchema } from '../events/events.schema';
+import {
+  AdminEventPageSchema,
+  AdminEventsQuerySchema,
+  CompleteEventResultSchema,
+  TrialBalanceSchema,
+} from './admin.schema';
 
 const adminErrors = {
   '401': errorResponse('No valid `X-User-Id`'),
@@ -30,6 +36,25 @@ export const adminPaths: ZodOpenApiPathsObject = {
         '200': jsonResponse('One page of events', AdminEventPageSchema),
         '400': errorResponse('Bad `limit` or `cursor` (`VALIDATION_ERROR`)'),
         ...adminErrors,
+      },
+    },
+  },
+  '/admin/events/{id}/complete': {
+    post: {
+      tags: ['Admin'],
+      summary: 'Mark an event as taken place and release its escrow',
+      description:
+        'Sets the event to `COMPLETED` and, for every paid order, posts `EVENT_SETTLED`: the seller’s payout ' +
+        'moves from pending to available and the fee from pending to revenue. Idempotent: repeating it settles ' +
+        'nothing new. A payment that arrives afterwards is refunded instead of entering escrow.',
+      security: [{ userId: [] }],
+      requestParams: { path: EventIdParamsSchema },
+      responses: {
+        '200': jsonResponse('What this request settled', CompleteEventResultSchema),
+        '400': errorResponse('`id` is not a positive integer'),
+        ...adminErrors,
+        '404': errorResponse('No such event (`EVENT_NOT_FOUND`)'),
+        '409': errorResponse('The event was cancelled (`EVENT_CANCELLED`)'),
       },
     },
   },

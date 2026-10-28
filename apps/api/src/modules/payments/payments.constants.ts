@@ -22,4 +22,6 @@ export const IPN_RESPONSE = {
 
 export type IpnResponse = (typeof IPN_RESPONSE)[keyof typeof IPN_RESPONSE];
 
-export const LATE_PAYMENT_REFUND_REASON = 'LATE_PAYMENT';
+// Why a refund was created (refunds.reason).
+export const LATE_PAYMENT_REFUND_REASON = 'LATE_PAYMENT'; // paid after the tickets were sold to someone else
+export const EVENT_ENDED_REFUND_REASON = 'EVENT_ENDED'; // paid after the event was completed or cancelled

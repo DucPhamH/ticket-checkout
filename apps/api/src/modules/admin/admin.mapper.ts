@@ -1,6 +1,7 @@
-import type { AdminEventDto, TrialBalanceDto } from '@tc/shared';
+import type { AdminEventDto, CompleteEventResultDto, TrialBalanceDto } from '@tc/shared';
 import type { Event } from '../../generated/prisma/client';
 import { toNumber } from '../../lib/money';
+import type { CompletionResult } from '../events/event-completion';
 import type { TrialBalance } from '../ledger/ledger.balances';
 import type { EventSales } from './admin.service';
 
@@ -23,5 +24,15 @@ export function toAdminEventDto(event: Event, sales: EventSales): AdminEventDto 
     paidOrders: sales.paidOrders,
     ticketsSold: sales.ticketsSold,
     paidTotal: toNumber(sales.paidTotal),
+  };
+}
+
+export function toCompleteEventResultDto(result: CompletionResult): CompleteEventResultDto {
+  return {
+    eventId: result.eventId,
+    completedAt: result.completedAt.toISOString(),
+    settledOrders: result.settledOrders,
+    sellerPayouts: toNumber(result.sellerPayouts),
+    platformRevenue: toNumber(result.platformRevenue),
   };
 }

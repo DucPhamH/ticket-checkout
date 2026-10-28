@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/06-ledger.md)
 
-> Status: tables, constraints, triggers and the posting service are built and tested. Balance
-> queries come with the wallet page.
+> Status: tables, constraints, triggers, the posting service, balance queries and event settlement
+> are built and tested. Cancellation and refunds come later.
 
 Every money movement is a double-entry transaction. Balances are never stored; they are sums
 over ledger lines.
@@ -84,3 +84,35 @@ await postTransaction(tx, {
   same key waits for the first one, then does nothing.
 
 Tests run inside rolled-back transactions because ledger rows cannot be deleted.
+
+## Reading balances (built)
+
+`modules/ledger/ledger.balances.ts` sums the entries on every call; nothing is cached.
+
+- `getUserBalances(userId)` → pending, available, refund pending (`GET /me/balances`). Accounts the
+  user has never used count as 0.
+- `getTrialBalance()` → every account as stored (+ debit, − credit) and the total, which must be 0
+  (`GET /admin/trial-balance`).
+- `ledger.history.ts`: the lines on a user's accounts, newest first, paginated by entry id
+  (`GET /me/ledger`).
+
+## Settling an event (built)
+
+`POST /admin/events/:id/complete` (`modules/events/event-completion.ts`), in one transaction:
+
+1. Lock the event row `FOR UPDATE`, set it to `COMPLETED`.
+2. For every `PAID` order of the event, post `EVENT_SETTLED` with key `settle:order:<id>`.
+   Repeating the request posts nothing new.
+
+The race it must survive: a payment succeeding at the same moment. If it landed in
+`seller:pending` after step 2 had read the orders, it would never be released. So creating an
+order and applying a successful payment both take a `FOR SHARE` lock on the event row
+(`events/event-lock.ts`):
+
+- the payment locked first → its order is `PAID` before step 2 reads the orders, and is settled;
+- the completion locked first → the payment sees the event is no longer `ACTIVE` and owes the money
+  back (`LATE_PAYMENT` posting, refund reason `EVENT_ENDED`) instead of entering escrow.
+
+Lock order is always order → payment → event for payments, and the completion locks only the
+event, so they cannot deadlock. `test/modules/event-completion.test.ts` races the two ten times;
+without the shared lock it leaves money stuck in escrow.

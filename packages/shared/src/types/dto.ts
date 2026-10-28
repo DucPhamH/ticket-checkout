@@ -101,3 +101,11 @@ export type AdminEventDto = {
   ticketsSold: number;
   paidTotal: number; // what buyers paid for those orders, fees included
 };
+
+export type CompleteEventResultDto = {
+  eventId: number;
+  completedAt: string;
+  settledOrders: number; // settled by this request; 0 if the event was already completed
+  sellerPayouts: number; // moved from sellers' pending to available by this request
+  platformRevenue: number; // fees earned by this request
+};

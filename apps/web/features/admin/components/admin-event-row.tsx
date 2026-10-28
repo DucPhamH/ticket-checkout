@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EVENT_STATUS_VARIANT } from '@/constants/status-styles';
 import { formatDateTime, formatVnd } from '@/lib/format';
+import { CompleteEventButton } from './complete-event-button';
 
 export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale: string }) {
   const t = useTranslations();
@@ -20,9 +21,14 @@ export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale:
         </div>
         <Badge variant={EVENT_STATUS_VARIANT[event.status]}>{t(`status.event.${event.status}`)}</Badge>
       </div>
+      {event.completedAt && (
+        <p className="text-xs text-emerald-700">
+          {t('admin.settledAt', { date: formatDateTime(event.completedAt, locale) })}
+        </p>
+      )}
       {event.status === 'ACTIVE' && (
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm">{t('admin.complete')}</Button>
+        <div className="flex flex-wrap items-start gap-2">
+          <CompleteEventButton eventId={event.id} locale={locale} />
           <Button size="sm" variant="outline" className="text-red-600">
             {t('admin.cancel')}
           </Button>

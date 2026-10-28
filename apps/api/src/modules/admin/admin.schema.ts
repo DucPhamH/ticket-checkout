@@ -1,5 +1,12 @@
 import { z } from 'zod';
-import { ACCOUNT_TYPES, EVENT_STATUSES, type AdminEventDto, type Page, type TrialBalanceDto } from '@tc/shared';
+import {
+  ACCOUNT_TYPES,
+  EVENT_STATUSES,
+  type AdminEventDto,
+  type CompleteEventResultDto,
+  type Page,
+  type TrialBalanceDto,
+} from '@tc/shared';
 import { pageQuerySchema, pageSchema } from '../../lib/pagination';
 
 export const TrialBalanceSchema = z
@@ -41,3 +48,16 @@ export const AdminEventsQuerySchema = pageQuerySchema(AdminEventCursorSchema);
 export const AdminEventPageSchema = pageSchema(AdminEventSchema).meta({ id: 'AdminEventPage' }) satisfies z.ZodType<
   Page<AdminEventDto>
 >;
+
+export const CompleteEventResultSchema = z
+  .object({
+    eventId: z.number().int(),
+    completedAt: isoDate,
+    settledOrders: z
+      .number()
+      .int()
+      .meta({ description: 'Settled by this request; 0 if already completed', example: 2 }),
+    sellerPayouts: z.number().int().meta({ description: 'Moved from sellers’ pending to available', example: 1472500 }),
+    platformRevenue: z.number().int().meta({ description: 'Fees earned by this request', example: 237500 }),
+  })
+  .meta({ id: 'CompleteEventResult' }) satisfies z.ZodType<CompleteEventResultDto>;

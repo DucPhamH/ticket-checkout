@@ -2,8 +2,8 @@
 
 [English](../06-ledger.md)
 
-> Trạng thái: bảng, ràng buộc, trigger và service ghi bút toán đã làm và có test. Truy vấn số dư làm
-> cùng trang Ví.
+> Trạng thái: bảng, ràng buộc, trigger, service ghi bút toán, truy vấn số dư và giải ngân sự kiện đã
+> làm và có test. Huỷ sự kiện và hoàn tiền làm sau.
 
 Mỗi lần tiền di chuyển là một giao dịch bút toán kép (double-entry). Số dư không bao giờ được
 lưu sẵn; nó là tổng các dòng trong sổ cái.
@@ -84,3 +84,34 @@ await postTransaction(tx, {
   gọi sau chờ nơi trước xong rồi không làm gì.
 
 Test chạy trong transaction được rollback, vì dòng sổ cái không xoá được.
+
+## Đọc số dư (đã làm)
+
+`modules/ledger/ledger.balances.ts` cộng lại các dòng sổ cái mỗi lần gọi; không lưu sẵn số dư.
+
+- `getUserBalances(userId)` → đang giữ, khả dụng, đang hoàn (`GET /me/balances`). Tài khoản người
+  dùng chưa từng dùng thì tính là 0.
+- `getTrialBalance()` → mọi tài khoản theo dấu đã lưu (+ Nợ, − Có) và tổng, luôn phải bằng 0
+  (`GET /admin/trial-balance`).
+- `ledger.history.ts`: các dòng trên tài khoản của một người dùng, mới nhất trước, phân trang theo
+  id dòng (`GET /me/ledger`).
+
+## Giải ngân sự kiện (đã làm)
+
+`POST /admin/events/:id/complete` (`modules/events/event-completion.ts`), trong một transaction:
+
+1. Khoá dòng sự kiện `FOR UPDATE`, chuyển sang `COMPLETED`.
+2. Với mỗi đơn `PAID` của sự kiện, ghi `EVENT_SETTLED` với key `settle:order:<id>`. Gọi lại thì
+   không ghi thêm gì.
+
+Tình huống phải chịu được: một thanh toán thành công đúng lúc đó. Nếu tiền vào `seller:pending`
+sau khi bước 2 đã đọc danh sách đơn, nó sẽ không bao giờ được giải ngân. Vì vậy tạo đơn và ghi
+nhận thanh toán thành công đều khoá `FOR SHARE` dòng sự kiện (`events/event-lock.ts`):
+
+- thanh toán khoá trước → đơn đã `PAID` trước khi bước 2 đọc danh sách, và được giải ngân;
+- giải ngân khoá trước → thanh toán thấy sự kiện không còn `ACTIVE`, nên ghi nợ hoàn tiền cho khách
+  (bút toán `LATE_PAYMENT`, lý do hoàn `EVENT_ENDED`) thay vì đưa tiền vào escrow.
+
+Với thanh toán, thứ tự khoá luôn là đơn → payment → sự kiện; giải ngân chỉ khoá sự kiện, nên hai
+bên không thể chờ nhau thành vòng (deadlock). `test/modules/event-completion.test.ts` cho hai việc
+chạy đua 10 lần; bỏ khoá chia sẻ thì có tiền bị kẹt trong escrow.

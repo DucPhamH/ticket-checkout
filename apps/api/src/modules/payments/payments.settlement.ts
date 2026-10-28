@@ -4,7 +4,8 @@ import { EventStatus, ListingStatus, OrderStatus, PaymentStatus } from '../../ge
 import { logger } from '../../lib/logger';
 import { latePaymentPosting, paymentCapturedPosting } from '../ledger/ledger.postings';
 import { postTransaction } from '../ledger/ledger.service';
-import { LATE_PAYMENT_REFUND_REASON } from './payments.constants';
+import { lockEvent } from '../events/event-lock';
+import { EVENT_ENDED_REFUND_REASON, LATE_PAYMENT_REFUND_REASON } from './payments.constants';
 import { VNPAY_AMOUNT_MULTIPLIER } from './vnpay/vnpay.constants';
 
 // A payment outcome reported by the gateway, from IPN or from our own query (querydr).
@@ -35,7 +36,7 @@ export async function settleGatewayResult(
     await tx.$queryRaw`SELECT id FROM payments WHERE id = ${target.paymentId} FOR UPDATE`;
     const payment = await tx.payment.findUniqueOrThrow({
       where: { id: target.paymentId },
-      include: { order: { include: { listing: { select: { sellerId: true } } } } },
+      include: { order: { include: { listing: { select: { sellerId: true, eventId: true } } } } },
     });
 
     if (!/^\d+$/.test(result.amount) || BigInt(result.amount) !== payment.amount * BigInt(VNPAY_AMOUNT_MULTIPLIER)) {
@@ -63,17 +64,21 @@ export async function settleGatewayResult(
 }
 
 type LockedPayment = Prisma.PaymentGetPayload<{
-  include: { order: { include: { listing: { select: { sellerId: true } } } } };
+  include: { order: { include: { listing: { select: { sellerId: true; eventId: true } } } } };
 }>;
 
 async function settleSuccessfulPayment(tx: Prisma.TransactionClient, payment: LockedPayment) {
   const { order } = payment;
 
+  // Shared lock: the event cannot be completed or cancelled until this commits, and if that already
+  // happened we see it here. Locked after the order and payment, never before (see event-lock.ts).
+  const eventOnSale = (await lockEvent(tx, order.listing.eventId, 'share')) === EventStatus.ACTIVE;
+
   // Tickets are still held (the order may be past expires_at, but the sweep has not run yet).
-  const stillReserved = order.status === OrderStatus.PENDING;
+  const stillReserved = eventOnSale && order.status === OrderStatus.PENDING;
   // The reservation expired and its tickets went back on sale; take them again if still there.
   const reReserved =
-    !stillReserved &&
+    eventOnSale &&
     order.status === OrderStatus.EXPIRED &&
     (
       await tx.listing.updateMany({
@@ -93,15 +98,23 @@ async function settleSuccessfulPayment(tx: Prisma.TransactionClient, payment: Lo
     return;
   }
 
-  // Paid, but the tickets are gone: never drop real money. Owe it back to the buyer.
+  // Paid, but no ticket can be given: never drop real money. Owe it back to the buyer.
+  if (order.status === OrderStatus.PENDING) {
+    // The event ended while this order still held tickets: put them back, so a refunded order never holds any.
+    await tx.listing.update({
+      where: { id: order.listingId },
+      data: { quantityAvailable: { increment: order.quantity } },
+    });
+  }
+  const reason = eventOnSale ? LATE_PAYMENT_REFUND_REASON : EVENT_ENDED_REFUND_REASON;
   const refund = await tx.refund.create({
-    data: { orderId: order.id, paymentId: payment.id, amount: order.total, reason: LATE_PAYMENT_REFUND_REASON },
+    data: { orderId: order.id, paymentId: payment.id, amount: order.total, reason },
   });
   await tx.order.update({ where: { id: order.id }, data: { status: OrderStatus.REFUND_PENDING } });
   await postTransaction(tx, latePaymentPosting(order, order.buyerId, refund.id));
   logger.warn(
-    { orderId: order.id, refundId: refund.id },
-    'payment arrived after its tickets were released; refund owed',
+    { orderId: order.id, refundId: refund.id, reason },
+    'payment arrived but no ticket can be given; refund owed',
   );
 }
 

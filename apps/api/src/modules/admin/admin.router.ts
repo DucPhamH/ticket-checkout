@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { currentUser } from '../../middlewares/current-user';
 import { requireAdmin } from '../../middlewares/require-admin';
-import { getAdminEvents, getAdminTrialBalance } from './admin.controller';
+import { getAdminEvents, getAdminTrialBalance, postCompleteEvent } from './admin.controller';
 
 export const adminRouter = Router();
 
@@ -9,3 +9,4 @@ export const adminRouter = Router();
 adminRouter.use('/admin', currentUser, requireAdmin);
 adminRouter.get('/admin/trial-balance', getAdminTrialBalance);
 adminRouter.get('/admin/events', getAdminEvents);
+adminRouter.post('/admin/events/:id/complete', postCompleteEvent);

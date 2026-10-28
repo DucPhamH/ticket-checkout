@@ -139,14 +139,24 @@
     "events": "Sự kiện",
     "complete": "Đánh dấu đã diễn ra",
     "cancel": "Huỷ sự kiện",
-    "completeHint": "Giải ngân tiền escrow cho người bán.",
+    "completeHint": "Sự kiện chuyển sang Đã diễn ra. Tiền escrow của mọi đơn đã thanh toán được giải ngân cho người bán; thanh toán tới sau sẽ được hoàn tiền.",
     "trialBalance": "Bảng cân đối thử",
     "trialBalanceHint": "Số dương là Nợ (debit), số âm là Có (credit). Tổng tất cả tài khoản luôn phải bằng 0.",
     "account": "Tài khoản",
     "balance": "Số dư",
     "sum": "Tổng",
     "noEvents": "Chưa có sự kiện nào",
-    "sales": "{orders} đơn đã thanh toán · {tickets} vé"
+    "sales": "{orders} đơn đã thanh toán · {tickets} vé",
+    "confirmComplete": "Xác nhận giải ngân",
+    "back": "Quay lại",
+    "completed": "Đã giải ngân {orders} đơn: {payouts} cho người bán, {revenue} phí sàn.",
+    "errors": {
+      "EVENT_CANCELLED": "Sự kiện đã bị huỷ, không thể giải ngân.",
+      "EVENT_NOT_FOUND": "Không tìm thấy sự kiện.",
+      "ADMIN_ONLY": "Chỉ Admin mới làm được việc này.",
+      "UNKNOWN": "Có lỗi xảy ra, hãy thử lại."
+    },
+    "settledAt": "Đã giải ngân escrow lúc {date}"
   },
   "notFound": {
     "title": "Không tìm thấy trang",

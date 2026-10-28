@@ -139,14 +139,24 @@
     "events": "Events",
     "complete": "Mark as completed",
     "cancel": "Cancel event",
-    "completeHint": "Releases escrowed money to sellers.",
+    "completeHint": "The event becomes completed. Escrow of every paid order is released to its seller; payments arriving later are refunded.",
     "trialBalance": "Trial balance",
     "trialBalanceHint": "Positive is a debit, negative a credit. The sum of every account must always be 0.",
     "account": "Account",
     "balance": "Balance",
     "sum": "Sum",
     "noEvents": "No events yet",
-    "sales": "{orders, plural, one {# paid order} other {# paid orders}} · {tickets, plural, one {# ticket} other {# tickets}}"
+    "sales": "{orders, plural, one {# paid order} other {# paid orders}} · {tickets, plural, one {# ticket} other {# tickets}}",
+    "confirmComplete": "Confirm and release escrow",
+    "back": "Back",
+    "completed": "Settled {orders, plural, one {# order} other {# orders}}: {payouts} to sellers, {revenue} in fees.",
+    "errors": {
+      "EVENT_CANCELLED": "This event was cancelled and cannot be settled.",
+      "EVENT_NOT_FOUND": "Event not found.",
+      "ADMIN_ONLY": "Only an admin can do this.",
+      "UNKNOWN": "Something went wrong. Please try again."
+    },
+    "settledAt": "Escrow released on {date}"
   },
   "notFound": {
     "title": "Page not found",

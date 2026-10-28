@@ -5,14 +5,20 @@ import { credit, debit, type PostingInput } from './ledger.service';
 
 type OrderAmounts = Pick<Order, 'id' | 'subtotal' | 'sellerFee' | 'total'>;
 
+// Who an order's money belongs to. The platform's share is the remainder, so the parts always add
+// up to exactly what the buyer paid.
+export function splitOrderTotal(order: OrderAmounts) {
+  const sellerPayout = order.subtotal - order.sellerFee;
+  return { sellerPayout, platformShare: order.total - sellerPayout };
+}
+
 /**
  * Buyer paid for an order we can fulfil. The gateway holds the money for us; we owe the seller
  * their payout (in escrow until the event) and keep our fee as pending, not yet earned.
  * Uses the amounts frozen on the order, never recomputed.
  */
 export function paymentCapturedPosting(order: OrderAmounts, sellerId: number): PostingInput {
-  const sellerPayout = order.subtotal - order.sellerFee;
-  const platformShare = order.total - sellerPayout; // the remainder, so the lines always balance
+  const { sellerPayout, platformShare } = splitOrderTotal(order);
   return {
     kind: LedgerTransactionKind.PAYMENT_CAPTURED,
     idempotencyKey: `capture:order:${order.id}`,
@@ -40,5 +46,25 @@ export function latePaymentPosting(
     orderId: order.id,
     refundId,
     lines: [debit(ACCOUNTS.gatewayClearing, order.total), credit(ACCOUNTS.buyerRefundPayable(buyerId), order.total)],
+  };
+}
+
+/**
+ * The event took place: release one order's escrow. The seller's payout becomes available and our
+ * fee becomes earned revenue. One posting per order, so settling an event twice changes nothing.
+ */
+export function eventSettledPosting(order: OrderAmounts, sellerId: number, eventId: number): PostingInput {
+  const { sellerPayout, platformShare } = splitOrderTotal(order);
+  return {
+    kind: LedgerTransactionKind.EVENT_SETTLED,
+    idempotencyKey: `settle:order:${order.id}`,
+    orderId: order.id,
+    eventId,
+    lines: [
+      debit(ACCOUNTS.sellerPending(sellerId), sellerPayout),
+      credit(ACCOUNTS.sellerAvailable(sellerId), sellerPayout),
+      debit(ACCOUNTS.feePending, platformShare),
+      credit(ACCOUNTS.feeRevenue, platformShare),
+    ],
   };
 }

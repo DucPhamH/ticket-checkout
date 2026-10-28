@@ -7,6 +7,7 @@ import { HttpError } from '../../lib/http-error';
 import { toNumber } from '../../lib/money';
 import { toPage } from '../../lib/pagination';
 import { createPaymentForOrder } from '../payments/payments.service';
+import { lockEvent } from '../events/event-lock';
 import { expireStaleOrders } from './order-expiry';
 import { toOrderDto } from './orders.mapper';
 import type { OrderCursor } from './orders.schema';
@@ -36,13 +37,12 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
   }
 
   return prisma.$transaction(async (tx) => {
-    const listing = await tx.listing.findUnique({
-      where: { id: input.listingId },
-      include: { event: { select: { status: true } } },
-    });
+    const listing = await tx.listing.findUnique({ where: { id: input.listingId } });
     if (!listing) throw HttpError.notFound('LISTING_NOT_FOUND', `No listing with id ${input.listingId}`);
     if (listing.sellerId === buyer.id) throw HttpError.conflict('OWN_LISTING', 'You cannot buy your own listing');
-    if (listing.status !== ListingStatus.ACTIVE || listing.event.status !== EventStatus.ACTIVE) {
+    // Shared lock: the event cannot be completed or cancelled while this order is being created.
+    const eventStatus = await lockEvent(tx, listing.eventId, 'share');
+    if (listing.status !== ListingStatus.ACTIVE || eventStatus !== EventStatus.ACTIVE) {
       throw HttpError.conflict('LISTING_NOT_ON_SALE', 'This listing is no longer on sale');
     }
 
