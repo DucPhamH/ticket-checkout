@@ -6,15 +6,19 @@ import { BalanceCards } from '@/features/wallet/components/balance-cards';
 import { LedgerList } from '@/features/wallet/components/ledger-list';
 import { getCurrentUser } from '@/features/users/api';
 import { listMyOrders } from '@/features/orders/api';
+import { listMyListings } from '@/features/listings/api';
+import { MyListingList } from '@/features/listings/components/my-listing-list';
 import { getBalances, listMyLedger } from '@/features/wallet/api';
 
 export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) {
   const { locale } = await params;
   const user = await getCurrentUser();
-  const [t, balances, orders, ledger] = await Promise.all([
+  const [t, tSell, balances, orders, listings, ledger] = await Promise.all([
     getTranslations('wallet'),
+    getTranslations('sell'),
     getBalances(user.id),
     listMyOrders(),
+    listMyListings(),
     listMyLedger(),
   ]);
 
@@ -32,6 +36,12 @@ export default async function WalletPage({ params }: PageProps<'/[locale]/me'>) 
           </CardHeader>
           {/* Keyed by user so switching user drops pages loaded for the previous one. */}
           <OrderList key={user.id} page={orders} locale={locale} />
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>{tSell('myListings')}</CardTitle>
+          </CardHeader>
+          <MyListingList key={user.id} page={listings} locale={locale} />
         </Card>
         <Card>
           <CardHeader className="pb-2">

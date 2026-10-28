@@ -110,6 +110,10 @@
       "ACTIVE": "Đang mở bán",
       "COMPLETED": "Đã diễn ra",
       "CANCELLED": "Đã huỷ"
+    },
+    "listing": {
+      "ACTIVE": "Đang bán",
+      "WITHDRAWN": "Đã gỡ"
     }
   },
   "wallet": {
@@ -161,5 +165,34 @@
   "notFound": {
     "title": "Không tìm thấy trang",
     "back": "Về trang chủ"
+  },
+  "sell": {
+    "title": "Bán vé cho sự kiện này",
+    "price": "Giá mỗi vé (VND)",
+    "priceHint": "Từ {min} đến {max}, là bội số của {step}.",
+    "quantity": "Số vé",
+    "decrease": "Giảm số vé",
+    "increase": "Tăng số vé",
+    "payout": "Bạn sẽ nhận",
+    "payoutNote": "(sau phí 5%, khi sự kiện diễn ra xong)",
+    "payoutUnknown": "Nhập giá hợp lệ để xem số tiền bạn sẽ nhận.",
+    "submit": "Đăng bán",
+    "created": "Đã đăng bán {quantity} vé.",
+    "viewMine": "Xem tin của tôi",
+    "myListings": "Tin đăng của tôi",
+    "noListings": "Bạn chưa đăng bán vé nào",
+    "counts": "Còn {available} · Đang giữ {reserved} · Đã bán {sold} / {total} vé",
+    "withdraw": "Gỡ tin",
+    "confirmWithdraw": "Xác nhận gỡ tin",
+    "back": "Quay lại",
+    "withdrawn": "Đã gỡ tin.",
+    "errors": {
+      "ADMIN_CANNOT_SELL": "Tài khoản quản trị không bán vé được. Hãy đổi sang người dùng khác.",
+      "EVENT_NOT_ON_SALE": "Sự kiện này không còn nhận đăng bán vé.",
+      "EVENT_NOT_FOUND": "Không tìm thấy sự kiện.",
+      "VALIDATION_ERROR": "Giá hoặc số vé chưa hợp lệ.",
+      "LISTING_NOT_FOUND": "Không tìm thấy tin đăng này.",
+      "UNKNOWN": "Có lỗi xảy ra, hãy thử lại."
+    }
   }
 }

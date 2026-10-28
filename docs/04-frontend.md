@@ -24,7 +24,7 @@ features/<feature>/
 i18n/, messages/        locales and all user-facing strings
 ```
 
-Features: `events`, `checkout`, `orders`, `wallet`, `admin`, `users`.
+Features: `events`, `checkout`, `orders`, `listings`, `wallet`, `admin`, `users`.
 
 ## The import rule
 

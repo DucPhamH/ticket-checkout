@@ -24,7 +24,7 @@ features/<tính năng>/
 i18n/, messages/           ngôn ngữ và toàn bộ chữ hiển thị
 ```
 
-Các tính năng: `events`, `checkout`, `orders`, `wallet`, `admin`, `users`.
+Các tính năng: `events`, `checkout`, `orders`, `listings`, `wallet`, `admin`, `users`.
 
 ## Quy tắc import
 

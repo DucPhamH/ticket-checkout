@@ -6,6 +6,7 @@ import { Container } from '@/components/layout/container';
 import { InfoHint } from '@/components/ui/info-hint';
 import { getCurrentUser } from '@/features/users/api';
 import { getEvent } from '@/features/events/api';
+import { SellForm } from '@/features/listings/components/sell-form';
 
 export default async function EventPage({ params }: PageProps<'/[locale]/events/[id]'>) {
   const { locale, id } = await params;
@@ -25,6 +26,7 @@ export default async function EventPage({ params }: PageProps<'/[locale]/events/
         ) : (
           <TicketPicker listings={listings} currentUserId={currentUser.id} />
         )}
+        {event.status === 'ACTIVE' && currentUser.role !== 'ADMIN' && <SellForm eventId={event.id} locale={locale} />}
         <section className="max-w-2xl">
           <h2 className="mb-2 text-lg font-bold">{t('about')}</h2>
           <p className="text-sm leading-relaxed text-slate-600">{event.description}</p>

@@ -110,6 +110,10 @@
       "ACTIVE": "On sale",
       "COMPLETED": "Completed",
       "CANCELLED": "Cancelled"
+    },
+    "listing": {
+      "ACTIVE": "On sale",
+      "WITHDRAWN": "Withdrawn"
     }
   },
   "wallet": {
@@ -161,5 +165,34 @@
   "notFound": {
     "title": "Page not found",
     "back": "Back to home"
+  },
+  "sell": {
+    "title": "Sell tickets for this event",
+    "price": "Price per ticket (VND)",
+    "priceHint": "From {min} to {max}, in steps of {step}.",
+    "quantity": "Tickets",
+    "decrease": "Fewer tickets",
+    "increase": "More tickets",
+    "payout": "You will receive",
+    "payoutNote": "(after the 5% fee, once the event has taken place)",
+    "payoutUnknown": "Enter a valid price to see what you will receive.",
+    "submit": "Put on sale",
+    "created": "{quantity, plural, one {# ticket is} other {# tickets are}} on sale.",
+    "viewMine": "View my listings",
+    "myListings": "My listings",
+    "noListings": "You have not listed any tickets",
+    "counts": "{available} on sale · {reserved} held · {sold} sold / {total}",
+    "withdraw": "Withdraw",
+    "confirmWithdraw": "Confirm withdrawal",
+    "back": "Back",
+    "withdrawn": "Withdrawn.",
+    "errors": {
+      "ADMIN_CANNOT_SELL": "Admin accounts cannot sell tickets. Switch to another user.",
+      "EVENT_NOT_ON_SALE": "This event no longer accepts listings.",
+      "EVENT_NOT_FOUND": "Event not found.",
+      "VALIDATION_ERROR": "The price or number of tickets is not valid.",
+      "LISTING_NOT_FOUND": "Listing not found.",
+      "UNKNOWN": "Something went wrong. Please try again."
+    }
   }
 }
