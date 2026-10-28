@@ -18,9 +18,10 @@ project.
 5. [Trigger](#5-trigger)
 6. [PL/pgSQL](#6-plpgsql)
 7. [View](#7-view)
-8. [Migration](#8-migration)
-9. [Kiểu dữ liệu đáng chú ý](#9-kiểu-dữ-liệu-đáng-chú-ý)
-10. [Bảng tóm tắt](#10-bảng-tóm-tắt)
+8. [WITH (CTE): gộp nhiều bước vào một câu SQL](#8-with-cte--gộp-nhiều-bước-vào-một-câu-sql)
+9. [Migration](#9-migration)
+10. [Kiểu dữ liệu đáng chú ý](#10-kiểu-dữ-liệu-đáng-chú-ý)
+11. [Bảng tóm tắt](#11-bảng-tóm-tắt)
 
 ---
 
@@ -460,7 +461,158 @@ Thay vì viết lại câu dài này mỗi lần, chỉ cần `SELECT * FROM acc
 
 ---
 
-## 8. Migration
+## 8. WITH (CTE) – gộp nhiều bước vào một câu SQL
+
+**`WITH` (Common Table Expression, CTE) cho phép chia một câu SQL dài thành nhiều bước có tên**,
+bước sau dùng kết quả của bước trước. Giống khai báo biến trong code:
+
+```
+WITH buoc_1 AS (...),          -- const buoc1 = ...
+     buoc_2 AS (... buoc_1 ...) -- const buoc2 = f(buoc1)
+SELECT ... FROM buoc_2         -- return ...
+```
+
+Trong Postgres, mỗi bước còn có thể là `UPDATE`/`INSERT`/`DELETE` (kèm `RETURNING`), nên cả một chuỗi
+"sửa bảng này rồi dùng kết quả sửa bảng kia" chỉ cần **một lần gửi tới database**.
+
+### Ví dụ thật: cho đơn hết hạn và trả vé (`apps/api/src/modules/orders/order-expiry.ts`)
+
+Giả sử có 3 đơn đang chờ đã quá hạn:
+
+| Đơn | listing_id | quantity |
+| --- | ---------- | -------- |
+| 7   | 1          | 2        |
+| 8   | 1          | 1        |
+| 9   | 4          | 3        |
+
+```sql
+WITH batch AS (
+  SELECT id
+  FROM orders
+  WHERE status = 'PENDING' AND expires_at < now()
+  ORDER BY expires_at, id
+  LIMIT 1000
+  FOR UPDATE SKIP LOCKED
+),
+```
+
+**Bước 1 – `batch`**: chọn các đơn đang chờ đã quá hạn, **cũ nhất trước**, **tối đa 1.000 đơn**, và
+**khoá chúng lại** để không ai khác sửa được trong lúc mình đang xử lý. Hai cụm cuối:
+
+- `FOR UPDATE`: khoá những dòng vừa chọn (giống `UPDATE` tự khoá, xem mục 4).
+- `SKIP LOCKED`: **dòng nào đang bị transaction khác khoá thì bỏ qua**, không đứng chờ. Ví dụ đúng lúc
+  đó đơn 8 đang được ghi nhận thanh toán: lượt quét này bỏ qua đơn 8, lượt sau (1 phút nữa) mới xét
+  lại nó, lúc đó có thể nó đã là `PAID` và không còn khớp điều kiện.
+
+Kết quả `batch`: đơn 7, 8, 9 (giả sử không ai đang khoá).
+
+```sql
+expired AS (
+  UPDATE orders
+  SET status = 'EXPIRED', updated_at = now()
+  FROM batch
+  WHERE orders.id = batch.id
+  RETURNING orders.listing_id, orders.quantity
+),
+```
+
+**Bước 2 – `expired`**: đổi **đúng những đơn trong `batch`** thành `EXPIRED`. `RETURNING` trả lại những
+dòng vừa sửa, nên "bảng tạm" `expired` chứa:
+
+| listing_id | quantity |
+| ---------- | -------- |
+| 1          | 2        |
+| 1          | 1        |
+| 4          | 3        |
+
+```sql
+released AS (
+  SELECT listing_id, SUM(quantity)::int AS tickets
+  FROM expired
+  GROUP BY listing_id
+),
+```
+
+**Bước 3 – `released`**: gom theo tin đăng và cộng số vé (hai đơn của tin 1 được cộng lại):
+
+| listing_id | tickets |
+| ---------- | ------- |
+| 1          | 3       |
+| 4          | 3       |
+
+`::int` đổi kết quả `SUM` (Postgres trả kiểu `bigint`) về số nguyên thường.
+
+```sql
+restocked AS (
+  UPDATE listings
+  SET quantity_available = listings.quantity_available + released.tickets, updated_at = now()
+  FROM released
+  WHERE listings.id = released.listing_id
+  RETURNING listings.id
+)
+```
+
+**Bước 4 – `restocked`**: `UPDATE ... FROM` là "cập nhật bảng `listings` bằng dữ liệu lấy từ
+`released`", ghép theo `listings.id = released.listing_id`. Tin 1 được cộng 3 vé, tin 4 được cộng 3
+vé, **trong cùng một lệnh**.
+
+```sql
+SELECT COUNT(*)::int AS expired FROM expired;
+```
+
+**Bước 5**: trả về số đơn đã hết hạn (ở đây là 3) để code ghi log.
+
+Lưu ý: bước 4 không được bước 5 dùng tới, nhưng Postgres **luôn chạy mọi bước có `UPDATE`/`INSERT`/
+`DELETE` đúng một lần**, dù kết quả của nó có được dùng hay không.
+
+### Chia lô: vì sao có `LIMIT 1000`
+
+Nếu một lúc có 100.000 đơn quá hạn (ví dụ hệ thống tắt cả buổi rồi bật lại), một transaction xử lý cả
+100.000 đơn sẽ khoá rất nhiều dòng trong khoảng một giây. Code chạy câu trên **từng lô 1.000 đơn, mỗi
+lô một transaction**, lặp tới khi một lô trả về ít hơn 1.000 đơn:
+
+```ts
+for (;;) {
+  const count = await prisma.$transaction((tx) => expireStaleOrders(tx, {}, batchSize));
+  total += count;
+  if (count < batchSize) return total; // lô cuối chưa đầy → đã hết đơn quá hạn
+}
+```
+
+Giữa hai lô, khoá được nhả ra, nên người mua vé không phải chờ lâu.
+
+### Vì sao nhanh hơn nhiều
+
+Cách cũ: một câu `UPDATE` cho đơn, rồi **mỗi tin đăng một câu `UPDATE`** gửi riêng. 1.000 tin đăng =
+1.001 lần gửi đi rồi chờ kết quả. Cách mới: **1 lần**. Đo trên 1 triệu đơn:
+
+| Đơn quá hạn          | Mỗi tin một câu | Một câu `WITH` |
+| -------------------- | --------------- | -------------- |
+| 100                  | 86 ms           | 5 ms           |
+| 1.000 trên 1.000 tin | 551 ms          | 22 ms          |
+
+Tin đăng cũng bị khoá ngắn hơn tương ứng, nên người đang mua vé ít phải chờ hơn.
+
+### Vì sao vẫn an toàn khi chạy lại hoặc chạy song song
+
+`WHERE status = 'PENDING'` chỉ khớp đơn **chưa** hết hạn. Chạy lần hai, `batch` rỗng → `expired`
+rỗng → không tin đăng nào được cộng vé. Hai lượt chạy cùng lúc: lượt sau **bỏ qua** những đơn lượt
+trước đang khoá (`SKIP LOCKED`), nên mỗi đơn chỉ được xử lý đúng một lần.
+
+### Tham số an toàn
+
+Trong code, phần lọc thêm (một đơn hoặc một tin đăng) được ghép bằng `Prisma.sql`:
+
+```ts
+const onlyOrder = scope.orderId === undefined ? Prisma.empty : Prisma.sql`AND id = ${scope.orderId}`;
+```
+
+`${...}` ở đây **không** nối chuỗi: Prisma gửi giá trị dưới dạng tham số (`$1`), nên không thể bị
+SQL injection (xem mục index phía trên về `$1, $2`).
+
+---
+
+## 9. Migration
 
 **Migration là một file SQL mô tả một lần thay đổi cấu trúc database** (tạo bảng, thêm cột, thêm
 index…). Các file được đánh số theo thời gian và chạy lần lượt.
@@ -487,7 +639,7 @@ viết tay, vì ngôn ngữ schema của Prisma không diễn đạt được nh
 
 ---
 
-## 9. Kiểu dữ liệu đáng chú ý
+## 10. Kiểu dữ liệu đáng chú ý
 
 | Kiểu          | Dùng cho                   | Vì sao                                                                          |
 | ------------- | -------------------------- | ------------------------------------------------------------------------------- |
@@ -499,7 +651,7 @@ viết tay, vì ngôn ngữ schema của Prisma không diễn đạt được nh
 
 ---
 
-## 10. Bảng tóm tắt
+## 11. Bảng tóm tắt
 
 | Khái niệm   | Một câu                                | Trong project dùng để                                                            |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------------- |

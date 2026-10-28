@@ -5,6 +5,7 @@ import type { User } from '../../generated/prisma/client';
 import { EventStatus, ListingStatus, UserRole } from '../../generated/prisma/enums';
 import { HttpError } from '../../lib/http-error';
 import { toNumber } from '../../lib/money';
+import { expireStaleOrders } from './order-expiry';
 
 // What every order read needs for its DTO: event and seller via the listing.
 export const orderInclude = {
@@ -41,6 +42,9 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
       throw HttpError.conflict('LISTING_NOT_ON_SALE', 'This listing is no longer on sale');
     }
 
+    // Tickets held by an unpaid order past its reservation belong back on sale before we check stock.
+    await expireStaleOrders(tx, { listingId: listing.id });
+
     // The checks above give friendly errors; this UPDATE is what actually guarantees no overselling.
     const reserved = await tx.listing.updateMany({
       where: { id: listing.id, status: ListingStatus.ACTIVE, quantityAvailable: { gte: input.quantity } },
@@ -71,9 +75,13 @@ export async function createOrder(buyer: User, input: CreateOrderInput) {
 }
 
 // Only the buyer can see an order. Anyone else gets "not found" rather than "forbidden",
-// so order ids cannot be probed.
+// so order ids cannot be probed. An order past its reservation is expired on read, so the
+// buyer sees EXPIRED immediately instead of waiting for the next background sweep.
 export function findOrderForBuyer(orderId: number, buyerId: number) {
-  return prisma.order.findFirst({ where: { id: orderId, buyerId }, include: orderInclude });
+  return prisma.$transaction(async (tx) => {
+    await expireStaleOrders(tx, { orderId });
+    return tx.order.findFirst({ where: { id: orderId, buyerId }, include: orderInclude });
+  });
 }
 
 export type OrderWithDetails = NonNullable<Awaited<ReturnType<typeof findOrderForBuyer>>>;
