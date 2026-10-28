@@ -49,8 +49,11 @@ Không có đăng nhập: chọn mình là ai ở ô đổi người dùng trên
 2. Quay về trang đơn hàng, đơn chuyển sang **Đã thanh toán**. Trong **Ví của tôi**, Chi thấy đơn;
    với tư cách **Alice** (người bán), tiền hiện ở mục **Đang giữ (escrow)**.
 3. Với tư cách **Admin**, vào **Quản trị**, bấm **Đánh dấu đã diễn ra**: escrow được giải ngân.
-   Tiền của Alice chuyển sang **Khả dụng**; bảng cân đối thử vẫn có tổng bằng 0.
-4. Hoặc **Huỷ sự kiện**: mọi đơn đã thanh toán được hoàn tiền qua API hoàn tiền của VNPay.
+   Tiền của Alice chuyển sang **Khả dụng**; bảng cân đối thử vẫn có tổng bằng 0. Chỉ đánh dấu được
+   khi sự kiện đã bắt đầu: sự kiện mẫu **Đà Lạt Acoustic Night** đang diễn ra (vẫn bán vé tại cửa),
+   nên hãy mua một vé ở đó trước để thấy tiền được giải ngân.
+4. Hoặc **Huỷ sự kiện** với sự kiện chưa bắt đầu: mọi đơn đã thanh toán được hoàn tiền qua API hoàn
+   tiền của VNPay.
 5. Ai cũng bán được: **Bán vé** ở trang sự kiện, **Gỡ tin** trong Ví của tôi.
 
 ### Nhận kết quả thanh toán khi không có tunnel
@@ -161,8 +164,6 @@ Những gì cần đổi trước khi dùng tiền thật:
   bằng vai trò của người dùng đang chọn.
 - **Lạm dụng giữ vé.** Chưa giới hạn số đơn chưa trả của mỗi người, chưa giới hạn tần suất: một
   người có thể giữ hết vé, mỗi lần 15 phút.
-- **Giải ngân quá sớm.** Admin đánh dấu "đã diễn ra" được cả trước giờ bắt đầu (để demo được với các
-  sự kiện mẫu ở tương lai). Production chỉ nên cho phép sau sự kiện, cộng thêm thời gian khiếu nại.
 - **Chưa có đối soát tự động.** Nếu IPN không bao giờ tới _và_ người mua đóng tab trước khi quay về,
   đơn đã trả tiền sẽ bị chuyển hết hạn. Tiền không mất (IPN tới muộn hoặc
   `npm run vnpay:reconcile -w @tc/api -- <orderId>` sẽ lấy lại vé hoặc hoàn tiền), nhưng không có gì

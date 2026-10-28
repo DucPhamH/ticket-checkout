@@ -12,11 +12,11 @@ const ADMIN = '4';
 
 const newUser = async (name: string) => (await prisma.user.create({ data: { name: `${TAG} ${name}` } })).id;
 
-// An event with one listing of 100,000 VND tickets.
+// An event already under way (only a started event can be completed), one listing of 100,000 VND tickets.
 async function eventWithListing(tickets = 10) {
   const seller = await newUser('seller');
   const event = await prisma.event.create({
-    data: { name: `${TAG} event`, venue: 'v', city: 'c', startsAt: new Date(Date.now() + 86_400_000) },
+    data: { name: `${TAG} event`, venue: 'v', city: 'c', startsAt: new Date(Date.now() - 60_000) }, // under way: can be completed
   });
   const listing = await prisma.listing.create({
     data: {
@@ -143,6 +143,18 @@ describe('POST /admin/events/:id/complete', () => {
       }
     }
     expect((await getTrialBalance()).total).toBe(0n);
+  });
+
+  it('refuses an event that has not started yet, and leaves it on sale', async () => {
+    const { eventId, listingId } = await eventWithListing();
+    await prisma.event.update({ where: { id: eventId }, data: { startsAt: new Date(Date.now() + 86_400_000) } });
+    await paySucceeds(await buy(listingId, 1));
+
+    const res = await complete(eventId);
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('EVENT_NOT_STARTED');
+    expect(await prisma.event.findUniqueOrThrow({ where: { id: eventId } })).toMatchObject({ status: 'ACTIVE' });
   });
 
   it('refuses a cancelled event, an unknown event and a non-admin', async () => {

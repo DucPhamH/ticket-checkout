@@ -100,7 +100,8 @@ Test chạy trong transaction được rollback, vì dòng sổ cái không xoá
 
 `POST /admin/events/:id/complete` (`modules/events/event-completion.ts`), trong một transaction:
 
-1. Khoá dòng sự kiện `FOR UPDATE`, chuyển sang `COMPLETED`.
+1. Khoá dòng sự kiện `FOR UPDATE`, chuyển sang `COMPLETED`. Chỉ sự kiện đã bắt đầu mới được đánh
+   dấu đã diễn ra (409 `EVENT_NOT_STARTED`); trước đó chỉ có thể huỷ.
 2. Với mỗi đơn `PAID` của sự kiện, ghi `EVENT_SETTLED` với key `settle:order:<id>`. Gọi lại thì
    không ghi thêm gì.
 

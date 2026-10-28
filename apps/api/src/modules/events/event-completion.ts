@@ -22,6 +22,7 @@ export type CompletionResult = {
  * lock on it, so none can run in between: an order is either PAID before we read the orders (and
  * is settled here), or its payment arrives after the event is COMPLETED (and is refunded).
  *
+ * Only an event that has started can be completed (before that it can only be cancelled).
  * Idempotent: calling it again for a completed event settles nothing new and returns zeros.
  */
 export async function completeEvent(eventId: number): Promise<CompletionResult> {
@@ -31,10 +32,14 @@ export async function completeEvent(eventId: number): Promise<CompletionResult> 
     if (status === EventStatus.CANCELLED) {
       throw HttpError.conflict('EVENT_CANCELLED', 'A cancelled event cannot be completed');
     }
+    const current = await tx.event.findUniqueOrThrow({ where: { id: eventId } });
+    if (status === EventStatus.ACTIVE && current.startsAt > new Date()) {
+      throw HttpError.conflict('EVENT_NOT_STARTED', 'An event can only be marked as taken place once it has started');
+    }
 
     const event =
       status === EventStatus.COMPLETED
-        ? await tx.event.findUniqueOrThrow({ where: { id: eventId } })
+        ? current
         : await tx.event.update({
             where: { id: eventId },
             data: { status: EventStatus.COMPLETED, completedAt: new Date() },

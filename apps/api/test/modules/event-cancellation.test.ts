@@ -154,6 +154,7 @@ describe('POST /admin/events/:id/cancel', () => {
 
   it('refuses a completed event, an unknown event and a non-admin', async () => {
     const { eventId } = await eventWithListing();
+    await prisma.event.update({ where: { id: eventId }, data: { startsAt: new Date(Date.now() - 60_000) } });
     await request(app).post(`/admin/events/${eventId}/complete`).set('X-User-Id', ADMIN);
 
     const completed = await cancel(eventId);

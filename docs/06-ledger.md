@@ -100,7 +100,8 @@ Tests run inside rolled-back transactions because ledger rows cannot be deleted.
 
 `POST /admin/events/:id/complete` (`modules/events/event-completion.ts`), in one transaction:
 
-1. Lock the event row `FOR UPDATE`, set it to `COMPLETED`.
+1. Lock the event row `FOR UPDATE`, set it to `COMPLETED`. Only an event that has started can be
+   completed (409 `EVENT_NOT_STARTED`); before that it can only be cancelled.
 2. For every `PAID` order of the event, post `EVENT_SETTLED` with key `settle:order:<id>`.
    Repeating the request posts nothing new.
 

@@ -47,6 +47,18 @@ async function main() {
         startsAt: daysFromNowAt(25, 20, 0),
       },
     });
+    // Already under way, so it can be marked as taken place (escrow released) in a demo. An event
+    // can only be completed once it has started, and only cancelled before.
+    const acousticNight = await tx.event.create({
+      data: {
+        name: 'Đà Lạt Acoustic Night',
+        description:
+          'An acoustic evening by the lake, already under way: tickets are still sold at the door, and an admin can mark it as taken place.',
+        venue: 'Quảng trường Lâm Viên',
+        city: 'Đà Lạt',
+        startsAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // started 2 hours ago
+      },
+    });
 
     const listing = (eventId: number, sellerId: number, unitPrice: number, quantity: number) => ({
       eventId,
@@ -62,6 +74,8 @@ async function main() {
         listing(indieNight.id, alice.id, 1_200_000, 2),
         listing(jazzFestival.id, bob.id, 800_000, 6),
         listing(jazzFestival.id, alice.id, 650_000, 2),
+        listing(acousticNight.id, alice.id, 300_000, 5),
+        listing(acousticNight.id, bob.id, 350_000, 3),
       ],
     });
 

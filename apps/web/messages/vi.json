@@ -174,7 +174,8 @@
       "UNKNOWN": "Có lỗi xảy ra, hãy thử lại.",
       "EVENT_COMPLETED": "Sự kiện đã diễn ra, không thể huỷ.",
       "REFUND_NOT_FOUND": "Không tìm thấy khoản hoàn tiền.",
-      "EVENT_STARTED": "Sự kiện đã bắt đầu, không thể huỷ. Hãy đánh dấu đã diễn ra."
+      "EVENT_STARTED": "Sự kiện đã bắt đầu, không thể huỷ. Hãy đánh dấu đã diễn ra.",
+      "EVENT_NOT_STARTED": "Sự kiện chưa bắt đầu nên chưa thể đánh dấu đã diễn ra."
     },
     "settledAt": "Đã giải ngân escrow lúc {date}",
     "confirmCancel": "Xác nhận huỷ và hoàn tiền",

@@ -48,8 +48,11 @@ There is no login: pick who you are in the header's user switcher.
 2. Back on the order page, the order turns **Paid**. In **My wallet**, Chi sees the order; as
    **Alice** (the seller), the money shows as **pending (escrow)**.
 3. As **Admin**, open **Admin** and click **Mark as taken place**: the escrow is released. Alice's
-   money moves to **available**; the trial balance still sums to 0.
-4. Or **Cancel event**: every paid order is refunded through VNPay's refund API.
+   money moves to **available**; the trial balance still sums to 0. An event can only be completed
+   once it has started: the seeded **Đà Lạt Acoustic Night** is already under way (its tickets are
+   still sold at the door), so buy one there first to see a payout.
+4. Or **Cancel event** on an event that has not started: every paid order is refunded through
+   VNPay's refund API.
 5. Any user can sell: **Sell tickets** on an event page, **Withdraw** from My wallet.
 
 ### Payment results without a tunnel
@@ -160,9 +163,6 @@ What would need to change before real money:
   only by the chosen user's role.
 - **Reservation abuse.** No limit on unpaid orders per person and no rate limiting: someone could
   hold every ticket for 15 minutes at a time.
-- **Settling too early.** An admin can mark an event as taken place before its start time (so the
-  seeded future events can be demoed). Production should allow it only after the event, plus a
-  dispute window.
 - **No background reconciliation.** If IPN never arrives _and_ the buyer closes the tab before
   returning, a paid order expires. No money is lost (a late IPN or
   `npm run vnpay:reconcile -w @tc/api -- <orderId>` re-takes the tickets or refunds), but nothing

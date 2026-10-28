@@ -51,7 +51,8 @@ export const adminPaths: ZodOpenApiPathsObject = {
       description:
         'Sets the event to `COMPLETED` and, for every paid order, posts `EVENT_SETTLED`: the seller’s payout ' +
         'moves from pending to available and the fee from pending to revenue. Idempotent: repeating it settles ' +
-        'nothing new. A payment that arrives afterwards is refunded instead of entering escrow.',
+        'nothing new. Only an event that has started can be completed. A payment that arrives afterwards is ' +
+        'refunded instead of entering escrow.',
       security: [{ userId: [] }],
       requestParams: { path: EventIdParamsSchema },
       responses: {
@@ -59,7 +60,9 @@ export const adminPaths: ZodOpenApiPathsObject = {
         '400': errorResponse('`id` is not a positive integer'),
         ...adminErrors,
         '404': errorResponse('No such event (`EVENT_NOT_FOUND`)'),
-        '409': errorResponse('The event was cancelled (`EVENT_CANCELLED`)'),
+        '409': errorResponse(
+          'The event has not started yet (`EVENT_NOT_STARTED`) or was cancelled (`EVENT_CANCELLED`)',
+        ),
       },
     },
   },

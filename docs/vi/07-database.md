@@ -77,8 +77,8 @@ thật. Mỗi trường hợp chạy trong một transaction rồi rollback, dù
 
 ## Dữ liệu mẫu
 
-`src/db/seed.ts` tạo bốn người dùng (hai người bán, một người mua, một admin), hai sự kiện, năm
-tin đăng và ba tài khoản sổ cái của sàn. Seed an toàn khi chạy lại (bỏ qua nếu đã có người dùng)
+`src/db/seed.ts` tạo bốn người dùng (hai người bán, một người mua, một admin), ba sự kiện (một
+sự kiện đang diễn ra, để demo được việc giải ngân), bảy tin đăng và ba tài khoản sổ cái của sàn. Seed an toàn khi chạy lại (bỏ qua nếu đã có người dùng)
 và chạy trong container `migrate` (chạy một lần), sau `prisma migrate deploy`, trước khi api khởi động. Seed không bao giờ tạo đơn
 hay dòng sổ cái: những thứ đó chỉ sinh ra từ luồng thật.
 

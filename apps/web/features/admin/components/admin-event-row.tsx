@@ -31,11 +31,14 @@ export function AdminEventRow({ event, locale }: { event: AdminEventDto; locale:
           {t('admin.cancelledAt', { date: formatDateTime(event.cancelledAt, locale) })}
         </p>
       )}
+      {/* Before it starts an event can only be cancelled; once it has started, only completed. */}
       {event.status === 'ACTIVE' && (
         <div className="flex flex-wrap items-start gap-2">
-          <CompleteEventButton eventId={event.id} locale={locale} />
-          {/* Once an event has started it can only be completed, not cancelled. */}
-          {new Date(event.startsAt) > new Date() && <CancelEventButton eventId={event.id} />}
+          {new Date(event.startsAt) <= new Date() ? (
+            <CompleteEventButton eventId={event.id} locale={locale} />
+          ) : (
+            <CancelEventButton eventId={event.id} />
+          )}
         </div>
       )}
     </li>

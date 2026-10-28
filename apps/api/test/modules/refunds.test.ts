@@ -23,7 +23,7 @@ async function owedRefund() {
   const seller = await newUser('seller');
   const buyer = await newUser('buyer');
   const event = await prisma.event.create({
-    data: { name: `${TAG} event`, venue: 'v', city: 'c', startsAt: new Date(Date.now() + 86_400_000) },
+    data: { name: `${TAG} event`, venue: 'v', city: 'c', startsAt: new Date(Date.now() - 60_000) }, // under way: can be completed
   });
   const listing = await prisma.listing.create({
     data: { eventId: event.id, sellerId: seller, unitPrice: 100_000n, quantityTotal: 5, quantityAvailable: 5 },

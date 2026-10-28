@@ -69,7 +69,12 @@ describe('GET /events', () => {
   it('returns seeded events soonest first with price and stock', async () => {
     // Fixtures from any test file start with "[".
     const seeded = (await getEvents()).filter((event) => !event.name.startsWith('['));
-    expect(seeded.map((event) => event.name)).toEqual(['Saigon Jazz Festival', 'Hà Nội Indie Night 2026']);
+    // The acoustic night started two hours before the seed ran, so it comes first.
+    expect(seeded.map((event) => event.name)).toEqual([
+      'Đà Lạt Acoustic Night',
+      'Saigon Jazz Festival',
+      'Hà Nội Indie Night 2026',
+    ]);
     // The dev database changes as the app is used (orders reserve tickets), so compare against
     // what the database holds right now rather than the seed's starting numbers.
     for (const event of seeded) {
