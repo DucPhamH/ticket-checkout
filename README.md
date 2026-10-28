@@ -18,6 +18,8 @@ Requirements: Docker. For development outside Docker, Node 22 (see `.nvmrc`).
 
 ```bash
 cp .env.example .env
+# Fill in VNP_TMN_CODE and VNP_HASH_SECRET (VNPay sandbox, sent separately).
+# The api refuses to start without them.
 docker compose up --build
 ```
 

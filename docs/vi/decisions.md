@@ -1,4 +1,3 @@
-**Đơn chưa thanh toán hết hạn ngay trong tiến trình api, không dùng worker hay cron riêng.** Lượt
-quét mỗi 60 giây trong api, cộng với hết hạn khi đọc đơn và trước khi giữ vé, đủ để vé luôn được mở
-bán lại mà không cần thêm hạ tầng. Việc này idempotent nên chạy nhiều bản api vẫn an toàn; khi quy
-mô lớn hơn thì chuyển sang một worker riêng hoặc job do database lên lịch.
+**Thiếu credential thanh toán thì dừng ngay.** Api không khởi động nếu thiếu credential VNPay hợp lệ,
+để lỗi cấu hình lộ ra ngay lúc deploy chứ không phải lúc có người thanh toán đầu tiên. Bước kiểm tra
+nằm ở điểm khởi động server, nên seed, migration và test vẫn chạy được mà không cần chúng.
