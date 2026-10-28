@@ -2,8 +2,8 @@
 
 [English](../05-payments.md)
 
-> Trạng thái: phần ký, tạo payment, return URL, IPN và đối soát `querydr` đã làm; nhận IPN thật từ
-> VNPay qua tunnel làm tiếp theo.
+> Trạng thái: đã làm xong và đã kiểm chứng trọn vẹn với VNPay sandbox, kể cả IPN thật gửi qua đường
+> hầm.
 
 ## Vì sao chọn VNPay
 
@@ -164,3 +164,16 @@ client ở `vnpay/vnpay.querydr.ts`):
 
 Đã kiểm chứng với sandbox: một đơn trả bằng thẻ test NCB mà IPN không tới đã được đối soát thành `PAID`,
 kèm mã giao dịch của VNPay, và bút toán ghi nhận tiền đã được ghi.
+
+## Kiểm chứng trọn vẹn với sandbox
+
+Một lần mua thanh toán bằng thẻ test NCB ngày 2026-10-28, khi đã đăng ký IPN URL và đường hầm đang chạy:
+
+| Thời điểm (GMT+7) | Chuyện gì xảy ra                                                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 13:40:20          | Tạo đơn 641 (650.000 + 10% = 715.000), chuyển trình duyệt sang VNPay                                                                        |
+| 13:41:19.999      | IPN từ `VNPAY GATEWAY/2.0`, chữ ký thật được xác thực → đơn `PAID`, ghi sổ `PAYMENT_CAPTURED` (+715.000 / −617.500 / −97.500), trả lời `00` |
+| 13:41:20.276      | Trình duyệt quay về return URL, sau IPN 0,28 giây; trang đơn đã hiện thanh toán thành công                                                  |
+
+Không cần tới `querydr`. Trước đó, khi chưa đăng ký IPN URL, một đơn khác thanh toán cùng cách đã được
+`querydr` xác nhận.

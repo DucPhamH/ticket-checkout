@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/05-payments.md)
 
-> Status: signing, payment creation, the return URL, IPN and `querydr` reconciliation are built;
-> receiving IPN from VNPay through the tunnel comes next.
+> Status: built and verified end to end against the VNPay sandbox, including a real IPN delivered
+> through the tunnel.
 
 ## Why VNPay
 
@@ -163,3 +163,16 @@ client in `vnpay/vnpay.querydr.ts`):
 
 Verified against the sandbox: an order paid with the NCB test card whose IPN never arrived was
 reconciled to `PAID` with VNPay's transaction number and the capture posted.
+
+## End-to-end check with the sandbox
+
+One purchase paid with the NCB test card on 2026-10-28, with the IPN URL registered and the tunnel up:
+
+| Time (GMT+7) | What happened                                                                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 13:40:20     | Order 641 created (650,000 + 10% = 715,000), browser sent to VNPay                                                                             |
+| 13:41:19.999 | IPN from `VNPAY GATEWAY/2.0`, real signature verified → order `PAID`, `PAYMENT_CAPTURED` posted (+715,000 / −617,500 / −97,500), answered `00` |
+| 13:41:20.276 | Browser back on the return URL, 0.28 s after the IPN; the order page already showed the payment as successful                                  |
+
+No `querydr` was needed. Earlier, with no IPN URL registered yet, another order paid the same way was
+settled by `querydr` instead.
