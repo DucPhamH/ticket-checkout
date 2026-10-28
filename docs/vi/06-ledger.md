@@ -2,8 +2,8 @@
 
 [English](../06-ledger.md)
 
-> Trạng thái: bảng, ràng buộc và trigger đã làm và có test (xem [Cơ sở dữ liệu](07-database.md)).
-> Tiếp theo là service ghi bút toán và truy vấn số dư.
+> Trạng thái: bảng, ràng buộc, trigger và service ghi bút toán đã làm và có test. Truy vấn số dư làm
+> cùng trang Ví.
 
 Mỗi lần tiền di chuyển là một giao dịch bút toán kép (double-entry). Số dư không bao giờ được
 lưu sẵn; nó là tổng các dòng trong sổ cái.
@@ -57,3 +57,30 @@ ngược, nên đó chưa phải doanh thu.
   nên làm tròn không bao giờ làm mất một đồng (test trong `test/shared/fees.test.ts`).
 - Số tiền là số nguyên từ đầu tới cuối. VND không có đơn vị lẻ; phép ×100 của VNPay chỉ áp dụng
   khi dựng URL thanh toán.
+
+## Service ghi bút toán (đã làm)
+
+`modules/ledger/ledger.service.ts`. Nơi gọi mô tả việc tiền di chuyển bằng các dòng `debit`/`credit`
+trên những tài khoản khai báo trong `constants/ledger.ts`:
+
+```ts
+await postTransaction(tx, {
+  kind: 'PAYMENT_CAPTURED',
+  idempotencyKey: `capture:order:${order.id}`,
+  orderId: order.id,
+  lines: [
+    debit(ACCOUNTS.gatewayClearing, total),
+    credit(ACCOUNTS.sellerPending(sellerId), sellerPayout),
+    credit(ACCOUNTS.feePending, platformRevenue),
+  ],
+});
+```
+
+- Chạy trong transaction của nơi gọi, nên việc ghi tiền commit cùng lúc với thay đổi nghiệp vụ gây ra nó.
+- Kiểm tra ≥ 2 dòng, không có dòng 0, tổng bằng 0 trước khi ghi; database kiểm tra thêm lần nữa.
+- Tự tạo tài khoản của người dùng (ví dụ `seller:2:pending`) ở lần dùng đầu tiên.
+- Idempotent: dòng giao dịch được chèn bằng `ON CONFLICT (idempotency_key) DO NOTHING`. Gọi lại thì
+  không ghi gì và trả về giao dịch cũ với `created: false`; nếu có nơi khác đang ghi cùng key thì nơi
+  gọi sau chờ nơi trước xong rồi không làm gì.
+
+Test chạy trong transaction được rollback, vì dòng sổ cái không xoá được.

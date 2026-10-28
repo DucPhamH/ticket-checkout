@@ -1,8 +1,8 @@
 // Demo data: users, events, listings and the platform ledger accounts.
 // Idempotent: does nothing if users already exist, so it is safe on every container start.
 // No orders or ledger entries are seeded; those only come from real flows.
-import { AccountType, UserRole } from '../src/generated/prisma/enums';
-import { PLATFORM_ACCOUNTS } from '../src/constants/ledger';
+import { UserRole } from '../src/generated/prisma/enums';
+import { ACCOUNTS } from '../src/constants/ledger';
 import { prisma } from '../src/db/prisma';
 
 // N days from today at a given Vietnam local time (UTC+7), e.g. 19:30 for an evening show.
@@ -65,11 +65,7 @@ async function main() {
     });
 
     await tx.account.createMany({
-      data: [
-        { code: PLATFORM_ACCOUNTS.gatewayClearing, type: AccountType.ASSET },
-        { code: PLATFORM_ACCOUNTS.feePending, type: AccountType.LIABILITY },
-        { code: PLATFORM_ACCOUNTS.feeRevenue, type: AccountType.REVENUE },
-      ],
+      data: [ACCOUNTS.gatewayClearing, ACCOUNTS.feePending, ACCOUNTS.feeRevenue],
     });
   });
 

@@ -2,8 +2,8 @@
 
 [Tiếng Việt](vi/06-ledger.md)
 
-> Status: tables, constraints and triggers are built and tested (see [Database](07-database.md)).
-> The posting service and balance queries come next.
+> Status: tables, constraints, triggers and the posting service are built and tested. Balance
+> queries come with the wallet page.
 
 Every money movement is a double-entry transaction. Balances are never stored; they are sums
 over ledger lines.
@@ -57,3 +57,30 @@ reversed, so it is not revenue yet.
   remainder so rounding never loses a đồng (tested in `test/shared/fees.test.ts`).
 - Amounts are integers end to end. VND has no minor unit; VNPay's ×100 is applied only when
   building the payment URL.
+
+## Posting service (built)
+
+`modules/ledger/ledger.service.ts`. Callers describe a movement with `debit`/`credit` lines on
+accounts from `constants/ledger.ts`:
+
+```ts
+await postTransaction(tx, {
+  kind: 'PAYMENT_CAPTURED',
+  idempotencyKey: `capture:order:${order.id}`,
+  orderId: order.id,
+  lines: [
+    debit(ACCOUNTS.gatewayClearing, total),
+    credit(ACCOUNTS.sellerPending(sellerId), sellerPayout),
+    credit(ACCOUNTS.feePending, platformRevenue),
+  ],
+});
+```
+
+- Runs inside the caller's transaction, so the money movement commits with the business change.
+- Checks ≥ 2 lines, no zero line and a zero sum before writing; the database checks again.
+- Creates a per-user account (e.g. `seller:2:pending`) the first time it is used.
+- Idempotent: the header is inserted with `ON CONFLICT (idempotency_key) DO NOTHING`. A repeat
+  writes nothing and returns the first transaction with `created: false`; a concurrent poster of the
+  same key waits for the first one, then does nothing.
+
+Tests run inside rolled-back transactions because ledger rows cannot be deleted.
